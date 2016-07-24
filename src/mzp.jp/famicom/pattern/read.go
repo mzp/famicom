@@ -1,0 +1,73 @@
+package pattern
+
+import "io"
+
+const (
+	// size for pixel
+	WIDTH  = 8
+	HEIGHT = 8
+
+	// size for byte
+	UNIT_BYTES = 8
+	READ_BYTES = UNIT_BYTES * 2
+)
+
+type Pattern [WIDTH][HEIGHT]byte
+
+func bits(x byte) []byte {
+	xs := make([]byte, 8)
+
+	for i := 0; i < len(xs); i++ {
+		xs[i] = (x & 0x80) >> 7
+		x = x << 1
+	}
+
+	return xs
+}
+
+func pattern(low, high []byte) Pattern {
+	result := Pattern{}
+
+	for y := 0; y < HEIGHT; y++ {
+		l, h := bits(low[y]), bits(high[y])
+
+		for x := 0; x < WIDTH; x++ {
+			result[y][x] = l[x] + h[x]<<1
+		}
+	}
+
+	return result
+}
+
+func ReadFromBytes(data []byte) (Pattern, bool) {
+	low, high := data[0:UNIT_BYTES], data[UNIT_BYTES:]
+
+	if len(low) == UNIT_BYTES && len(high) == UNIT_BYTES {
+		return pattern(low, high), true
+	} else {
+		return Pattern{}, false
+	}
+}
+
+func ReadAll(reader io.Reader) []Pattern {
+	patterns := []Pattern{}
+
+	buf := make([]byte, READ_BYTES)
+
+	for {
+		n, _ := reader.Read(buf)
+		if n != READ_BYTES {
+			break
+		}
+
+		x, ok := ReadFromBytes(buf)
+
+		if !ok {
+			break
+		}
+
+		patterns = append(patterns, x)
+	}
+
+	return patterns
+}
