@@ -1,4 +1,4 @@
-package disasm
+package decoder
 
 import "io"
 
@@ -23,7 +23,7 @@ func readValue(reader io.Reader, n int) (int, error) {
 	return value, nil
 }
 
-func Disasm(reader io.Reader) []Instruction {
+func Decode(reader io.Reader) []Instruction {
 	instructions := []Instruction{}
 
 	for {

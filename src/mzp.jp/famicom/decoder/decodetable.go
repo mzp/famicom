@@ -1,4 +1,4 @@
-package disasm
+package decoder
 
 type entry struct {
 	op             int

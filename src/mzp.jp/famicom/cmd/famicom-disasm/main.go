@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"mzp.jp/famicom/disasm"
+	"mzp.jp/famicom/decoder"
 )
 
 func assert(err error) {
@@ -20,7 +20,7 @@ func read(path string) {
 
 	defer file.Close()
 
-	for _, inst := range disasm.Disasm(file) {
+	for _, inst := range decoder.Decode(file) {
 		fmt.Println(inst.String())
 	}
 }

@@ -1,4 +1,4 @@
-package disasm
+package decoder
 
 import (
 	"fmt"

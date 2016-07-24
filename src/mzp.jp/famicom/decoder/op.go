@@ -1,4 +1,4 @@
-package disasm
+package decoder
 
 const (
 	LDA int = iota
