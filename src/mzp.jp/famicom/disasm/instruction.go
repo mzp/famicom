@@ -1,11 +1,23 @@
 package disasm
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 type Instruction struct {
-	op int
+	op             int
+	addressingMode int
+	value          int
 }
 
 func (inst Instruction) String() string {
-	return strings.ToLower(opcodeName(inst.op))
+	if inst.addressingMode == None {
+		return strings.ToLower(opcodeName(inst.op))
+	} else {
+		return fmt.Sprintf(
+			"%s %s",
+			strings.ToLower(opcodeName(inst.op)),
+			formatAddressingMode(inst.addressingMode, inst.value))
+	}
 }
