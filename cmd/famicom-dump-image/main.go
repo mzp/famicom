@@ -8,7 +8,7 @@ import (
 	"os"
 	pathlib "path"
 
-	"mzp.jp/famicom/pattern"
+	"github.com/mzp/famicom/pattern"
 )
 
 func assert(err error) {

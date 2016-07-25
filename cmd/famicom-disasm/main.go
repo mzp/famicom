@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"mzp.jp/famicom/decoder"
+	"github.com/mzp/famicom/decoder"
 )
 
 func assert(err error) {
