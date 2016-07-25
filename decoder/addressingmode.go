@@ -2,8 +2,10 @@ package decoder
 
 import "fmt"
 
+type addressingMode int
+
 const (
-	None int = iota
+	None addressingMode = iota
 	Immediate
 	ZeroPage
 	ZeroPageX
@@ -17,7 +19,7 @@ const (
 	IndirectY
 )
 
-func formatAddressingMode(mode, value int) string {
+func formatAddressingMode(mode addressingMode, value int) string {
 	switch mode {
 	case None:
 		return ""

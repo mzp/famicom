@@ -6,8 +6,8 @@ import (
 )
 
 type Instruction struct {
-	op             int
-	addressingMode int
+	op             op
+	addressingMode addressingMode
 	value          int
 }
 

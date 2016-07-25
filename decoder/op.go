@@ -1,7 +1,9 @@
 package decoder
 
+type op int
+
 const (
-	LDA int = iota
+	LDA op = iota
 	LDX
 	LDY
 	STA
@@ -59,7 +61,7 @@ const (
 	NOP
 )
 
-func opcodeName(op int) string {
+func opcodeName(op op) string {
 	switch op {
 	case LDA:
 		return "LDA"

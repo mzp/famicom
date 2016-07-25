@@ -1,9 +1,9 @@
 package decoder
 
 type entry struct {
-	op             int
+	op             op
 	size           int
-	addressingMode int
+	addressingMode addressingMode
 }
 
 var decodeTable = map[byte]entry{
