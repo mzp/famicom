@@ -6,7 +6,7 @@ import (
 	"image/color"
 	"image/png"
 	"os"
-	pathlib "path"
+	"path/filepath"
 
 	"github.com/mzp/famicom/pattern"
 )
@@ -50,8 +50,8 @@ func createImage(name string, patterns []pattern.Pattern) {
 }
 
 func name(path string) string {
-	ext := pathlib.Ext(path)
-	basename := pathlib.Base(path)
+	ext := filepath.Ext(path)
+	basename := filepath.Base(path)
 
 	return basename[0 : len(basename)-len(ext)]
 }
