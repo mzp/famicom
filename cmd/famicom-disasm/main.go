@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 
 	"github.com/mzp/famicom/decoder"
@@ -20,7 +21,10 @@ func read(path string) {
 
 	defer file.Close()
 
-	for _, inst := range decoder.Decode(file) {
+	data, err := ioutil.ReadAll(file)
+	assert(err)
+
+	for _, inst := range decoder.DecodeAll(data) {
 		fmt.Println(inst.String())
 	}
 }

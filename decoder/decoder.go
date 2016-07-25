@@ -1,49 +1,35 @@
 package decoder
 
-import "io"
-
-func readByte(reader io.Reader) (byte, error) {
-	data := make([]byte, 1)
-	_, err := reader.Read(data)
-	return data[0], err
-}
-
-func readValue(reader io.Reader, n int) (int, error) {
+func readValue(data []byte, pc, size int) int {
 	value := 0
-	for i := 0; i < n; i++ {
-		v, err := readByte(reader)
 
-		if err != nil {
-			return 0, err
-		}
-
-		value += int(v) << uint(8*i)
+	for i := 0; i < size; i++ {
+		v := data[pc+i]
+		value |= int(v) << uint(8*i)
 	}
 
-	return value, nil
+	return value
 }
 
-func Decode(reader io.Reader) []Instruction {
+func Decode(data []byte, pc int) (Instruction, int) {
+	op := data[pc]
+	entry := decodeTable[op]
+
+	value := readValue(data, pc+1, entry.size)
+
+	inst := Instruction{entry.op, entry.addressingMode, value}
+	return inst, entry.size + 1
+}
+
+func DecodeAll(data []byte) []Instruction {
 	instructions := []Instruction{}
 
-	for {
-		op, err := readByte(reader)
+	pc := 0
 
-		if err != nil {
-			break
-		}
-
-		entry := decodeTable[op]
-
-		value, err := readValue(reader, entry.size)
-
-		if err != nil {
-			break
-		}
-
-		instructions = append(
-			instructions,
-			Instruction{entry.op, entry.addressingMode, value})
+	for pc < len(data) {
+		inst, n := Decode(data, pc)
+		pc += n
+		instructions = append(instructions, inst)
 	}
 
 	return instructions
