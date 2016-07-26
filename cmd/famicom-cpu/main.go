@@ -47,6 +47,20 @@ func main() {
 		switch s {
 		case "step":
 			c.Step()
+		case "mem":
+			fmt.Print("where: ")
+			var d int
+			fmt.Scanf("%x", &d)
+
+			for i := 0; i < 0x40; i++ {
+				if i%16 == 0 {
+					fmt.Println("")
+				}
+
+				fmt.Printf("%02x ", m.Data[d+i])
+			}
+
+			fmt.Println("")
 		case "q":
 			os.Exit(0)
 		}
