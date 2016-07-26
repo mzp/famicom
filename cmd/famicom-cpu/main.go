@@ -37,7 +37,7 @@ func main() {
 	c := cpu.New(m, 0x8000)
 
 	for {
-		fmt.Printf("next: %s\n", c.CurrentInstruction().String())
+		fmt.Printf("next: %s\n%s\n", c.CurrentInstruction().String(), c.String())
 
 		var s string
 
@@ -47,8 +47,6 @@ func main() {
 		switch s {
 		case "step":
 			c.Step()
-		case "reg":
-			fmt.Println(c.String())
 		case "q":
 			os.Exit(0)
 		}

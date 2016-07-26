@@ -110,6 +110,23 @@ func (c *CPU) Step() {
 	}
 }
 
+func (status status) String() string {
+	b := func(x bool) int {
+		if x {
+			return 1
+		} else {
+			return 0
+		}
+	}
+
+	return fmt.Sprintf("N:%d V:%d B%d I:%d Z:%d C:%d",
+		b(status.negative),
+		b(status.overflow),
+		b(status.brk),
+		b(status.irq),
+		b(status.zero),
+		b(status.carry))
+}
 func (c *CPU) String() string {
-	return fmt.Sprintf("x:%08x y:%08x a:%08x", c.x, c.y, c.a)
+	return fmt.Sprintf("x:%08x y:%08x a:%08x [%s]", c.x, c.y, c.a, c.status.String())
 }
