@@ -3,7 +3,7 @@ package cpu
 import (
 	"fmt"
 
-	"github.com/mzp/famicom/decoder"
+	d "github.com/mzp/famicom/decoder"
 	memlib "github.com/mzp/famicom/memory"
 )
 
@@ -23,40 +23,48 @@ func New(m *memlib.Memory, start int) *CPU {
 	return &t
 }
 
-func (c *CPU) CurrentInstruction() decoder.Instruction {
-	inst, _ := decoder.Decode(c.memory.Data[:], c.pc)
+func (c *CPU) CurrentInstruction() d.Instruction {
+	inst, _ := d.Decode(c.memory.Data[:], c.pc)
 	return inst
 }
 
-func (c *CPU) read(inst decoder.Instruction) uint8 {
+func (c *CPU) address(inst d.Instruction) uint16 {
 	value := inst.Value
 
 	switch inst.AddressingMode {
-	case decoder.Immediate:
-		return uint8(value)
-	case decoder.ZeroPage:
-		return c.memory.ReadZeroPage(uint8(value))
-	case decoder.ZeroPageX:
-		return c.memory.ReadZeroPage(uint8(value) + c.x)
-	case decoder.ZeroPageY:
-		return c.memory.ReadZeroPage(uint8(value) + c.y)
-	case decoder.Absolute:
-		return c.memory.Read(uint16(value))
-	case decoder.AbsoluteX:
-		return c.memory.Read(uint16(value) + uint16(c.x))
-	case decoder.AbsoluteY:
-		return c.memory.Read(uint16(value) + uint16(c.y))
-	case decoder.Indirect:
+	case d.ZeroPage:
+		return uint16(value)
+	case d.ZeroPageX:
+		return uint16(value) + uint16(c.x)
+	case d.ZeroPageY:
+		return uint16(value) + uint16(c.y)
+	case d.Absolute:
+		return uint16(value)
+	case d.AbsoluteX:
+		return uint16(value) + uint16(c.x)
+	case d.AbsoluteY:
+		return uint16(value) + uint16(c.y)
+	case d.Indirect:
+		return c.memory.Read16(uint16(value))
+	case d.IndirectX:
+		return c.memory.Read16(uint16(value) + uint16(c.x))
+	case d.IndirectY:
 		address := c.memory.Read16(uint16(value))
-		return c.memory.Read(address)
-	case decoder.IndirectX:
-		address := c.memory.Read16(uint16(value) + uint16(c.x))
-		return c.memory.Read(address)
-	case decoder.IndirectY:
-		address := c.memory.Read16(uint16(value))
-		return c.memory.Read(address + uint16(c.y))
+		return address + uint16(c.y)
 	default:
 		panic("unknown addressing mode")
+	}
+}
+
+func (c *CPU) read(inst d.Instruction) uint8 {
+	value := inst.Value
+
+	switch inst.AddressingMode {
+	case d.Immediate:
+		return uint8(value)
+	default:
+		address := c.address(inst)
+		return c.memory.Read(address)
 	}
 }
 
@@ -82,16 +90,20 @@ func (c *CPU) setY(value uint8) {
 	c.status = nz(value)
 }
 
+func (c *CPU) clear() {
+	c.status = status{}
+}
+
 func (c *CPU) Step() {
-	inst, n := decoder.Decode(c.memory.Data[:], c.pc)
+	inst, n := d.Decode(c.memory.Data[:], c.pc)
 	c.pc += n
 
 	switch inst.Op {
-	case decoder.LDA:
+	case d.LDA:
 		c.setA(c.read(inst))
-	case decoder.LDX:
+	case d.LDX:
 		c.setX(c.read(inst))
-	case decoder.LDY:
+	case d.LDY:
 		c.setY(c.read(inst))
 	default:
 		c.status = status{}

@@ -17,10 +17,6 @@ func (memory *Memory) Read(address uint16) uint8 {
 	return memory.Data[address]
 }
 
-func (memory *Memory) ReadZeroPage(address uint8) uint8 {
-	return memory.Data[uint16(address)]
-}
-
 func (memory *Memory) Read16(address uint16) uint16 {
 	low := memory.Data[address]
 	high := memory.Data[address+1]
