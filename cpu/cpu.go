@@ -76,17 +76,8 @@ func (c *CPU) load(reg *uint8, value uint8) {
 	c.status = nz(value)
 }
 
-func (c *CPU) setX(value uint8) {
-	c.x = value
-	c.status = nz(value)
-}
-
-func (c *CPU) setY(value uint8) {
-	c.y = value
-	c.status = nz(value)
-}
-
-func (c *CPU) clear() {
+func (c *CPU) store(address uint16, value uint8) {
+	c.memory.Write(address, value)
 	c.status = status{}
 }
 
@@ -101,6 +92,12 @@ func (c *CPU) Step() {
 		c.load(&c.x, c.read(inst))
 	case d.LDY:
 		c.load(&c.y, c.read(inst))
+	case d.STA:
+		c.store(c.address(inst), c.a)
+	case d.STX:
+		c.store(c.address(inst), c.x)
+	case d.STY:
+		c.store(c.address(inst), c.y)
 	default:
 		c.status = status{}
 	}

@@ -22,3 +22,7 @@ func (memory *Memory) Read16(address uint16) uint16 {
 	high := memory.Data[address+1]
 	return uint16(high)<<8 | uint16(low)
 }
+
+func (memory *Memory) Write(address uint16, value byte) {
+	memory.Data[address] = value
+}
