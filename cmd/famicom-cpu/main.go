@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"io/ioutil"
+	"os"
 
-	"github.com/mzp/famicom/memory"
 	"github.com/mzp/famicom/cpu"
+	"github.com/mzp/famicom/memory"
 )
 
 func assert(err error) {
@@ -37,6 +37,8 @@ func main() {
 	c := cpu.New(m, 0x8000)
 
 	for {
+		fmt.Printf("next: %s\n", c.CurrentInstruction().String())
+
 		var s string
 
 		fmt.Print("> ")
@@ -45,11 +47,12 @@ func main() {
 		switch s {
 		case "step":
 			c.Step()
-		case "inst":
-			inst := c.CurrentInstruction()
-			fmt.Println(inst.String())
+		case "reg":
+			fmt.Println(c.String())
 		case "q":
 			os.Exit(0)
 		}
+
+		fmt.Println("")
 	}
 }
