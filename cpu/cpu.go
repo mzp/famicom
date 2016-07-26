@@ -8,10 +8,10 @@ import (
 )
 
 type CPU struct {
-	memory  *memlib.Memory
-	pc      int
-	a, x, y byte
-	status  status
+	memory     *memlib.Memory
+	pc         int
+	a, x, y, s byte
+	status     status
 }
 
 func New(m *memlib.Memory, start int) *CPU {
@@ -98,11 +98,23 @@ func (c *CPU) Step() {
 		c.store(c.address(inst), c.x)
 	case d.STY:
 		c.store(c.address(inst), c.y)
+	case d.TAX:
+		c.load(&c.x, c.a)
+	case d.TAY:
+		c.load(&c.y, c.a)
+	case d.TSX:
+		c.load(&c.x, c.s)
+	case d.TXA:
+		c.load(&c.a, c.x)
+	case d.TXS:
+		c.load(&c.s, c.x)
+	case d.TYA:
+		c.load(&c.a, c.y)
 	default:
 		c.status = status{}
 	}
 }
 
 func (c *CPU) String() string {
-	return fmt.Sprintf("x:%08x y:%08x a:%08x [%s]", c.x, c.y, c.a, c.status.String())
+	return fmt.Sprintf("x:%08x y:%08x a:%08x s:%08x [%s]", c.x, c.y, c.a, c.s, c.status.String())
 }
