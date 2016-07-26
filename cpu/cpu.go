@@ -71,8 +71,8 @@ func nz(value uint8) status {
 	}
 }
 
-func (c *CPU) setA(value uint8) {
-	c.a = value
+func (c *CPU) load(reg *uint8, value uint8) {
+	*reg = value
 	c.status = nz(value)
 }
 
@@ -96,11 +96,11 @@ func (c *CPU) Step() {
 
 	switch inst.Op {
 	case d.LDA:
-		c.setA(c.read(inst))
+		c.load(&c.a, c.read(inst))
 	case d.LDX:
-		c.setX(c.read(inst))
+		c.load(&c.x, c.read(inst))
 	case d.LDY:
-		c.setY(c.read(inst))
+		c.load(&c.y, c.read(inst))
 	default:
 		c.status = status{}
 	}
