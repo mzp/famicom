@@ -6,6 +6,7 @@ type addressingMode int
 
 const (
 	None addressingMode = iota
+	Accumlator
 	Immediate
 	ZeroPage
 	ZeroPageX
@@ -23,6 +24,8 @@ func formatAddressingMode(mode addressingMode, value int) string {
 	switch mode {
 	case None:
 		return ""
+	case Accumlator:
+		return "a"
 	case Immediate:
 		return fmt.Sprintf("#$%04x", value)
 	case ZeroPage:
