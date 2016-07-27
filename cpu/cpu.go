@@ -123,6 +123,53 @@ func (c *CPU) compare(reg uint8, inst d.Instruction) {
 	}
 }
 
+func (c *CPU) shiftL(inst d.Instruction, carry bool) {
+	bit := uint8(toInt(carry))
+	if inst.AddressingMode == d.Accumlator {
+		ret := c.a<<1 | bit
+		c.status = status{
+			negative: (0x80 & ret) != 0,
+			zero:     ret == 0,
+			carry:    (c.a & 0x80) != 0,
+		}
+		c.a = ret
+	} else {
+		address := c.address(inst)
+		value := c.memory.Read(address)
+		ret := value<<1 | bit
+		c.status = status{
+			negative: (0x80 & ret) != 0,
+			zero:     ret == 0,
+			carry:    (value & 0x80) != 0,
+		}
+		c.memory.Write(address, ret)
+	}
+}
+
+func (c *CPU) shiftR(inst d.Instruction, carry bool) {
+	var bit uint8
+
+	if inst.AddressingMode == d.Accumlator {
+		ret := c.a>>1 | bit
+		c.status = status{
+			negative: (0x80 & ret) != 0,
+			zero:     ret == 0,
+			carry:    (c.a & 0x01) != 0,
+		}
+		c.a = ret
+	} else {
+		address := c.address(inst)
+		value := c.memory.Read(address)
+		ret := value>>1 | bit
+		c.status = status{
+			negative: (0x80 & ret) != 0,
+			zero:     ret == 0,
+			carry:    (value & 0x01) != 0,
+		}
+		c.memory.Write(address, ret)
+	}
+}
+
 func (c *CPU) Step() {
 	inst, n := d.Decode(c.memory.Data[:], c.pc)
 	c.pc += n
@@ -158,13 +205,7 @@ func (c *CPU) Step() {
 	case d.AND:
 		c.load(&c.a, c.a&c.read(inst))
 	case d.ASL:
-		if inst.AddressingMode == d.Accumlator {
-			c.loadC(&c.a, int(c.a)<<1)
-		} else {
-			address := c.address(inst)
-			value := c.memory.Read(address)
-			c.store(address, value<<1)
-		}
+		c.shiftL(inst, false)
 	case d.BIT:
 		value := c.read(inst)
 		c.status = status{
@@ -196,29 +237,11 @@ func (c *CPU) Step() {
 	case d.INY:
 		c.load(&c.y, c.y+1)
 	case d.LSR:
-		if inst.AddressingMode == d.Accumlator {
-			c.loadC(&c.a, int(c.a)>>1)
-		} else {
-			address := c.address(inst)
-			value := c.memory.Read(address)
-			c.store(address, value>>1)
-		}
+		c.shiftR(inst, false)
 	case d.ROL:
-		if inst.AddressingMode == d.Accumlator {
-			c.loadC(&c.a, int(c.a)<<1)
-		} else {
-			address := c.address(inst)
-			value := c.memory.Read(address)
-			c.store(address, value<<1)
-		}
+		c.shiftL(inst, c.status.carry)
 	case d.ROR:
-		if inst.AddressingMode == d.Accumlator {
-			c.loadC(&c.a, int(c.a)>>1)
-		} else {
-			address := c.address(inst)
-			value := c.memory.Read(address)
-			c.store(address, value>>1)
-		}
+		c.shiftR(inst, c.status.carry)
 	case d.ORA:
 		value := c.read(inst)
 		c.load(&c.a, c.a|value)
