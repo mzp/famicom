@@ -6,20 +6,20 @@ type status struct {
 	negative, overflow, brk, irq, zero, carry bool
 }
 
-func (status status) String() string {
-	b := func(x bool) int {
-		if x {
-			return 1
-		} else {
-			return 0
-		}
+func toInt(b bool) int {
+	if b {
+		return 1
+	} else {
+		return 0
 	}
+}
 
+func (status status) String() string {
 	return fmt.Sprintf("N:%d V:%d B%d I:%d Z:%d C:%d",
-		b(status.negative),
-		b(status.overflow),
-		b(status.brk),
-		b(status.irq),
-		b(status.zero),
-		b(status.carry))
+		toInt(status.negative),
+		toInt(status.overflow),
+		toInt(status.brk),
+		toInt(status.irq),
+		toInt(status.zero),
+		toInt(status.carry))
 }
