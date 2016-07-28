@@ -2,10 +2,10 @@ package decoder
 
 import "fmt"
 
-type addressingMode int
+type AddressingMode int
 
 const (
-	None addressingMode = iota
+	None AddressingMode = iota
 	Accumlator
 	Immediate
 	ZeroPage
@@ -20,7 +20,7 @@ const (
 	IndirectY
 )
 
-func formatAddressingMode(mode addressingMode, value int) string {
+func formatAddressingMode(mode AddressingMode, value int) string {
 	switch mode {
 	case None:
 		return ""
