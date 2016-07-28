@@ -149,6 +149,10 @@ func (c *CPU) shiftL(inst d.Instruction, carry bool) {
 func (c *CPU) shiftR(inst d.Instruction, carry bool) {
 	var bit uint8
 
+	if carry {
+		bit = 0x80
+	}
+
 	if inst.AddressingMode == d.Accumlator {
 		ret := c.a>>1 | bit
 		c.status = status{
