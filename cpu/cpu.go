@@ -170,10 +170,13 @@ func (c *CPU) shiftR(inst d.Instruction, carry bool) {
 	}
 }
 
-func (c *CPU) Step() {
+func (c *CPU) Fetch() d.Instruction {
 	inst, n := d.Decode(c.memory.Data[:], c.pc)
 	c.pc += n
+	return inst
+}
 
+func (c *CPU) Execute(inst d.Instruction) {
 	switch inst.Op {
 	case d.LDA:
 		c.load(&c.a, c.read(inst))
@@ -251,6 +254,10 @@ func (c *CPU) Step() {
 	default:
 		c.status = status{}
 	}
+}
+
+func (c *CPU) Step() {
+	c.Execute(c.Fetch())
 }
 
 func (c *CPU) String() string {
