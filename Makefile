@@ -10,5 +10,8 @@ build:
 fmt:
 	go fmt github.com/mzp/famicom/...
 
+test:
+	go test github.com/mzp/famicom/...
+
 clean:
 	rm -rf build
