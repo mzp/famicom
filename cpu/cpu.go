@@ -99,23 +99,23 @@ func (c *CPU) store(address uint16, value uint8) {
 }
 
 func (c *CPU) adc(inst d.Instruction) {
-	value := int(c.a)+int(c.read(inst))+toInt(c.status.carry)
+	value := int(c.a) + int(c.read(inst)) + toInt(c.status.carry)
 	c.status = nz(uint8(value))
 	c.status.carry = value > 0xFF
 	c.status.overflow =
-	  (c.a <= 0x7F && 0x80 <= uint8(value)) ||
-	  (uint8(value) <= 0x7F && 0x80 <= c.a)
+		(c.a <= 0x7F && 0x80 <= uint8(value)) ||
+			(uint8(value) <= 0x7F && 0x80 <= c.a)
 	c.a = uint8(value)
 }
 
 func (c *CPU) sbc(inst d.Instruction) {
-	value := int(c.a)-int(c.read(inst))-(1-toInt(c.status.carry))
+	value := int(c.a) - int(c.read(inst)) - (1 - toInt(c.status.carry))
 
 	c.status = nz(uint8(value))
 	c.status.carry = value >= 0
 	c.status.overflow =
-	  (c.a <= 0x7F && 0x80 <= uint8(value)) ||
-	  (uint8(value) <= 0x7F && 0x80 <= c.a)
+		(c.a <= 0x7F && 0x80 <= uint8(value)) ||
+			(uint8(value) <= 0x7F && 0x80 <= c.a)
 
 	c.a = uint8(value)
 }

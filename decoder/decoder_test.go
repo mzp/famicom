@@ -5,10 +5,10 @@ import "testing"
 func TestDecode(t *testing.T) {
 
 	data := []byte{
-	  0xea, // EOP
-	  0xad, // lda $2000
-	  0x00,
-	  0x20,
+		0xea, // EOP
+		0xad, // lda $2000
+		0x00,
+		0x20,
 	}
 	inst, size := Decode(data, 1)
 

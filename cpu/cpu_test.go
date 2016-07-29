@@ -209,8 +209,8 @@ func TestADC(t *testing.T) {
 		{0x0, 0x0, false, 0x0, status{zero: true}},
 		{0x0, 0x0, true, 0x1, status{}},
 		{0x7F, 0x1, false, 0x80, status{negative: true, overflow: true}},
-		{0x80, 0x5, false, 0x85, status{negative: true, }},
-		{0x80, 0x80, false, 0x00, status{overflow: true, carry: true, zero: true, }},
+		{0x80, 0x5, false, 0x85, status{negative: true}},
+		{0x80, 0x80, false, 0x00, status{overflow: true, carry: true, zero: true}},
 	}
 
 	for _, test := range tests {
@@ -246,13 +246,13 @@ func TestSBC(t *testing.T) {
 		expect uint8
 		status status
 	}{
-		{0x30, 0x20, true, 0x10, status{ carry: true }},
+		{0x30, 0x20, true, 0x10, status{carry: true}},
 		{0x0, 0x0, true, 0x0, status{zero: true, carry: true}},
-		{0x2, 0x0, false, 0x1, status{ carry: true }},
-		{0x0, 0x1, true, 0xFF, status{negative: true, overflow: true, }},
-		{0x1, 0x3, true, 0xFE, status{ carry: false, overflow: true, negative: true, }},
-		{0x80, 0x1, true, 0x7F, status{overflow: true,carry: true, }},
-		{0x85, 0x1, true, 0x84, status{ negative: true, carry: true, }},
+		{0x2, 0x0, false, 0x1, status{carry: true}},
+		{0x0, 0x1, true, 0xFF, status{negative: true, overflow: true}},
+		{0x1, 0x3, true, 0xFE, status{carry: false, overflow: true, negative: true}},
+		{0x80, 0x1, true, 0x7F, status{overflow: true, carry: true}},
+		{0x85, 0x1, true, 0x84, status{negative: true, carry: true}},
 	}
 
 	for i, test := range tests {
