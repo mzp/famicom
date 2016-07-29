@@ -98,19 +98,26 @@ func (c *CPU) store(address uint16, value uint8) {
 	c.status = status{}
 }
 
-func (c *CPU) loadVC(reg *uint8, value int) {
-	*reg = uint8(value)
-	c.status = nvzc(value)
+func (c *CPU) adc(inst d.Instruction) {
+	value := int(c.a)+int(c.read(inst))+toInt(c.status.carry)
+	c.status = nz(uint8(value))
+	c.status.carry = value > 0xFF
+	c.status.overflow =
+	  (c.a <= 0x7F && 0x80 <= uint8(value)) ||
+	  (uint8(value) <= 0x7F && 0x80 <= c.a)
+	c.a = uint8(value)
 }
 
-func (c *CPU) loadC(reg *uint8, value int) {
-	*reg = uint8(value)
-	c.status = nzc(value)
-}
+func (c *CPU) sbc(inst d.Instruction) {
+	value := int(c.a)-int(c.read(inst))-(1-toInt(c.status.carry))
 
-func (c *CPU) storeC(address uint16, value int) {
-	c.memory.Write(address, uint8(value))
-	c.status = nzc(value)
+	c.status = nz(uint8(value))
+	c.status.carry = value >= 0
+	c.status.overflow =
+	  (c.a <= 0x7F && 0x80 <= uint8(value)) ||
+	  (uint8(value) <= 0x7F && 0x80 <= c.a)
+
+	c.a = uint8(value)
 }
 
 func (c *CPU) compare(reg uint8, inst d.Instruction) {
@@ -207,8 +214,7 @@ func (c *CPU) Execute(inst d.Instruction) {
 	case d.TYA:
 		c.load(&c.a, c.y)
 	case d.ADC:
-		c.loadVC(&c.a,
-			int(c.a)+int(c.read(inst))+toInt(c.status.carry))
+		c.adc(inst)
 	case d.AND:
 		c.load(&c.a, c.a&c.read(inst))
 	case d.ASL:
@@ -253,8 +259,7 @@ func (c *CPU) Execute(inst d.Instruction) {
 		value := c.read(inst)
 		c.load(&c.a, c.a|value)
 	case d.SBC:
-		c.loadVC(&c.a,
-			int(c.a)-int(c.read(inst))-(1-toInt(c.status.carry)))
+		c.sbc(inst)
 	default:
 		c.status = status{}
 	}
