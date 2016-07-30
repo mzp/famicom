@@ -609,3 +609,92 @@ func TestShiftFlag(t *testing.T) {
 		}
 	}
 }
+
+func TestPHA(t *testing.T) {
+	cpu, m := create()
+
+	cpu.s = 0xFF
+	cpu.a = 0xca
+
+	cpu.Execute(decoder.Instruction{Op: decoder.PHA})
+
+	if m.Read(0x01FF) != 0xca {
+		t.Error("cannot push stack")
+	}
+
+	if cpu.s != 0xFE {
+		t.Error("cannot growth stack")
+	}
+
+	cpu.a = 0
+	cpu.Execute(decoder.Instruction{Op: decoder.PLA})
+
+	if cpu.a != 0xca {
+		t.Error("cannot pop stack")
+	}
+
+	if cpu.s != 0xFF {
+		t.Error("cannot shink stack")
+	}
+}
+
+func TestPHAFlag(t *testing.T) {
+	cpu, m := create()
+
+	tests := []struct {
+		value    uint8
+		negative bool
+		zero     bool
+	}{
+		{0x00, false, true},
+		{0x01, false, false},
+		{0x80, true, false},
+	}
+
+	for n, test := range tests {
+		cpu.s = 0x0FE
+		m.Write(0x01FF, test.value)
+		cpu.status.overflow = true
+		cpu.Execute(decoder.Instruction{Op: decoder.PLA})
+
+		if cpu.status.negative != test.negative {
+			t.Errorf("%d cannot store negative flag", n)
+		}
+
+		if cpu.status.zero != test.zero {
+			t.Errorf("%d cannot store zero flag", n)
+		}
+
+		if !cpu.status.overflow {
+			t.Errorf("%d broke overflow flag", n)
+		}
+	}
+}
+
+func TestPHP(t *testing.T) {
+	cpu, m := create()
+
+	cpu.s = 0xFF
+	cpu.status = status{negative: true, carry: true}
+
+	cpu.Execute(decoder.Instruction{Op: decoder.PHP})
+
+	if m.Read(0x01FF) != 0x81 {
+		t.Error("cannot push stack")
+	}
+
+	if cpu.s != 0xFE {
+		t.Error("cannot growth stack")
+	}
+
+	cpu.status = status{}
+	cpu.Execute(decoder.Instruction{Op: decoder.PLP})
+
+	if (cpu.status != status{negative: true, carry: true}) {
+		t.Error("cannot pop stack")
+	}
+
+	if cpu.s != 0xFF {
+		t.Error("cannot shink stack")
+	}
+}

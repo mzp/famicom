@@ -151,6 +151,11 @@ func (c *CPU) shiftR(inst d.Instruction, carry bool) {
 	}
 }
 
+func (c *CPU) push(value uint8) {
+	c.memory.Write(uint16(c.s)+0x100, value)
+	c.s -= 1
+}
+
 func (c *CPU) Fetch() d.Instruction {
 	inst, n := d.Decode(c.memory.Data[:], c.pc)
 	c.pc += n
@@ -228,6 +233,18 @@ func (c *CPU) Execute(inst d.Instruction) {
 		c.load(&c.a, c.a|value)
 	case d.SBC:
 		c.sbc(inst)
+	case d.PHA:
+		c.push(c.a)
+	case d.PLA:
+		c.s += 1
+		c.a = c.memory.Read(uint16(c.s) + 0x100)
+		c.nz(c.a)
+	case d.PHP:
+		c.push(c.status.uint8())
+	case d.PLP:
+		c.s += 1
+		value := c.memory.Read(uint16(c.s) + 0x100)
+		c.status.set(value)
 	default:
 		c.status = status{}
 	}
