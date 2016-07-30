@@ -113,6 +113,23 @@ func TestLoad(t *testing.T) {
 	}
 }
 
+func TestLoadFlag(t *testing.T) {
+	cpu, _ := create()
+	cpu.status.overflow = true
+	cpu.status.carry = true
+	cpu.status.brk = true
+
+	cpu.Execute(decoder.Instruction{
+		Op:             decoder.LDA,
+		AddressingMode: decoder.Immediate,
+		Value:          42,
+	})
+
+	if (cpu.status != status{overflow: true, carry: true, brk: true}) {
+		t.Error("clear unexpected flag")
+	}
+}
+
 func TestStore(t *testing.T) {
 	inst := func(op decoder.Op) decoder.Instruction {
 		return decoder.Instruction{
@@ -140,6 +157,24 @@ func TestStore(t *testing.T) {
 	cpu.Execute(inst(decoder.STY))
 	if m.Read(42) != 3 {
 		t.Errorf("Store 3, but %x", m.Read(42))
+	}
+}
+
+func TestStoreFlag(t *testing.T) {
+	cpu, _ := create()
+	cpu.status.zero = true
+	cpu.status.overflow = true
+	cpu.status.carry = true
+	cpu.status.brk = true
+
+	cpu.Execute(decoder.Instruction{
+		Op:             decoder.STA,
+		AddressingMode: decoder.Absolute,
+		Value:          42,
+	})
+
+	if (cpu.status != status{overflow: true, carry: true, brk: true, zero: true}) {
+		t.Error("clear unexpected flag")
 	}
 }
 
@@ -230,6 +265,24 @@ func TestADC(t *testing.T) {
 	}
 }
 
+func TestADCFlag(t *testing.T) {
+	inst := decoder.Instruction{
+		Op:             decoder.ADC,
+		AddressingMode: decoder.Immediate,
+		Value:          0x20,
+	}
+
+	cpu, _ := create()
+	cpu.a = 0x30
+	cpu.status.brk = true
+
+	cpu.Execute(inst)
+
+	if !cpu.status.brk {
+		t.Error("clear unexpected flag")
+	}
+}
+
 func TestSBC(t *testing.T) {
 	inst := decoder.Instruction{
 		Op:             decoder.SBC,
@@ -269,6 +322,24 @@ func TestSBC(t *testing.T) {
 		if cpu.status != test.status {
 			t.Errorf("%d. Expect\n%s, but\n%s", i, test.status.String(), cpu.status.String())
 		}
+	}
+}
+
+func TestSBCFlag(t *testing.T) {
+	inst := decoder.Instruction{
+		Op:             decoder.SBC,
+		AddressingMode: decoder.Immediate,
+		Value:          0x20,
+	}
+
+	cpu, _ := create()
+	cpu.a = 0x30
+	cpu.status.brk = true
+
+	cpu.Execute(inst)
+
+	if !cpu.status.brk {
+		t.Error("clear unexpected flag")
 	}
 }
 
@@ -397,6 +468,20 @@ func TestCompare(t *testing.T) {
 	}
 }
 
+func TestCompareFlag(t *testing.T) {
+	cpu, _ := create()
+	cpu.status.overflow = true
+	cpu.Execute(decoder.Instruction{
+		Op:             decoder.CMP,
+		AddressingMode: decoder.Absolute,
+		Value:          0x2000,
+	})
+
+	if !cpu.status.overflow {
+		t.Error("clear unexpected flag")
+	}
+}
+
 func TestBitCompare(t *testing.T) {
 	inst := func(op decoder.Op) decoder.Instruction {
 		return decoder.Instruction{
@@ -430,6 +515,20 @@ func TestBitCompare(t *testing.T) {
 				test.status.String(),
 				cpu.status.String())
 		}
+	}
+}
+
+func TestBitFlag(t *testing.T) {
+	cpu, _ := create()
+	cpu.status.carry = true
+	cpu.Execute(decoder.Instruction{
+		Op:             decoder.BIT,
+		AddressingMode: decoder.Absolute,
+		Value:          0x2000,
+	})
+
+	if !cpu.status.carry {
+		t.Error("clear unexpected flag")
 	}
 }
 
@@ -482,5 +581,31 @@ func TestShiftLeft(t *testing.T) {
 	}
 	if cpu.status.carry != true {
 		t.Error()
+	}
+}
+
+func TestShiftFlag(t *testing.T) {
+	cpu, _ := create()
+
+	cpu.status.overflow = true
+
+	ops := []decoder.Op{
+		decoder.ASL,
+		decoder.LSR,
+		decoder.ROL,
+		decoder.ROR,
+	}
+
+	for _, op := range ops {
+
+		cpu.Execute(decoder.Instruction{
+			Op:             op,
+			AddressingMode: decoder.Accumlator,
+			Value:          0,
+		})
+
+		if !cpu.status.overflow {
+			t.Error("clear unexpected flag")
+		}
 	}
 }

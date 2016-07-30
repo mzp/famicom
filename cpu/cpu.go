@@ -64,43 +64,23 @@ func (c *CPU) read(inst d.Instruction) uint8 {
 	}
 }
 
-func nz(value uint8) status {
-	return status{
-		negative: (0x80 & value) != 0,
-		zero:     value == 0,
-	}
-}
-
-func nzc(value int) status {
-	return status{
-		negative: (0x80 & value) != 0,
-		zero:     value == 0,
-		carry:    value > 0xFF,
-	}
-}
-
-func nvzc(value int) status {
-	return status{
-		negative: (0x80 & value) != 0,
-		overflow: value > 0x7F,
-		zero:     value == 0,
-		carry:    value > 0xFF,
-	}
+func (cpu *CPU) nz(value uint8) {
+	cpu.status.negative = (0x80 & value) != 0
+	cpu.status.zero = value == 0
 }
 
 func (c *CPU) load(reg *uint8, value uint8) {
 	*reg = value
-	c.status = nz(value)
+	c.nz(value)
 }
 
 func (c *CPU) store(address uint16, value uint8) {
 	c.memory.Write(address, value)
-	c.status = status{}
 }
 
 func (c *CPU) adc(inst d.Instruction) {
 	value := int(c.a) + int(c.read(inst)) + toInt(c.status.carry)
-	c.status = nz(uint8(value))
+	c.nz(uint8(value))
 	c.status.carry = value > 0xFF
 	c.status.overflow =
 		(c.a <= 0x7F && 0x80 <= uint8(value)) ||
@@ -111,7 +91,7 @@ func (c *CPU) adc(inst d.Instruction) {
 func (c *CPU) sbc(inst d.Instruction) {
 	value := int(c.a) - int(c.read(inst)) - (1 - toInt(c.status.carry))
 
-	c.status = nz(uint8(value))
+	c.nz(uint8(value))
 	c.status.carry = value >= 0
 	c.status.overflow =
 		(c.a <= 0x7F && 0x80 <= uint8(value)) ||
@@ -123,32 +103,26 @@ func (c *CPU) sbc(inst d.Instruction) {
 func (c *CPU) compare(reg uint8, inst d.Instruction) {
 	value := c.read(inst)
 
-	c.status = status{
-		negative: reg < value,
-		zero:     reg == value,
-		carry:    reg >= value,
-	}
+	c.status.negative = reg < value
+	c.status.zero = reg == value
+	c.status.carry = reg >= value
 }
 
 func (c *CPU) shiftL(inst d.Instruction, carry bool) {
 	bit := uint8(toInt(carry))
 	if inst.AddressingMode == d.Accumlator {
 		ret := c.a<<1 | bit
-		c.status = status{
-			negative: (0x80 & ret) != 0,
-			zero:     ret == 0,
-			carry:    (c.a & 0x80) != 0,
-		}
+		c.status.negative = (0x80 & ret) != 0
+		c.status.zero = ret == 0
+		c.status.carry = (c.a & 0x80) != 0
 		c.a = ret
 	} else {
 		address := c.address(inst)
 		value := c.memory.Read(address)
 		ret := value<<1 | bit
-		c.status = status{
-			negative: (0x80 & ret) != 0,
-			zero:     ret == 0,
-			carry:    (value & 0x80) != 0,
-		}
+		c.status.negative = (0x80 & ret) != 0
+		c.status.zero = ret == 0
+		c.status.carry = (value & 0x80) != 0
 		c.memory.Write(address, ret)
 	}
 }
@@ -162,21 +136,17 @@ func (c *CPU) shiftR(inst d.Instruction, carry bool) {
 
 	if inst.AddressingMode == d.Accumlator {
 		ret := c.a>>1 | bit
-		c.status = status{
-			negative: (0x80 & ret) != 0,
-			zero:     ret == 0,
-			carry:    (c.a & 0x01) != 0,
-		}
+		c.status.negative = (0x80 & ret) != 0
+		c.status.zero = ret == 0
+		c.status.carry = (c.a & 0x01) != 0
 		c.a = ret
 	} else {
 		address := c.address(inst)
 		value := c.memory.Read(address)
 		ret := value>>1 | bit
-		c.status = status{
-			negative: (0x80 & ret) != 0,
-			zero:     ret == 0,
-			carry:    (value & 0x01) != 0,
-		}
+		c.status.negative = (0x80 & ret) != 0
+		c.status.zero = ret == 0
+		c.status.carry = (value & 0x01) != 0
 		c.memory.Write(address, ret)
 	}
 }
@@ -221,11 +191,9 @@ func (c *CPU) Execute(inst d.Instruction) {
 		c.shiftL(inst, false)
 	case d.BIT:
 		value := c.read(inst)
-		c.status = status{
-			negative: value&0x80 != 0,
-			overflow: value&0x40 != 0,
-			zero:     c.a&value == 0,
-		}
+		c.status.negative = value&0x80 != 0
+		c.status.overflow = value&0x40 != 0
+		c.status.zero = c.a&value == 0
 	case d.CMP:
 		c.compare(c.a, inst)
 	case d.CPX:
