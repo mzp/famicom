@@ -15,7 +15,7 @@ type CPU struct {
 }
 
 func New(m *memlib.Memory, start int) *CPU {
-	t := CPU{memory: m, pc: start}
+	t := CPU{memory: m, pc: start, s: 0xff}
 	return &t
 }
 
@@ -245,6 +245,17 @@ func (c *CPU) Execute(inst d.Instruction) {
 		c.s += 1
 		value := c.memory.Read(uint16(c.s) + 0x100)
 		c.status.set(value)
+	case d.JMP:
+		c.pc = int(c.address(inst))
+	case d.JSR:
+		c.push(uint8(c.pc >> 8))
+		c.push(uint8(c.pc))
+		c.pc = int(c.address(inst))
+	case d.RTS:
+		c.s += 1
+		value := c.memory.Read16(uint16(c.s) + 0x100)
+		c.s += 1
+		c.pc = int(value)
 	default:
 		c.status = status{}
 	}

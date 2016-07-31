@@ -698,3 +698,51 @@ func TestPHP(t *testing.T) {
 		t.Error("cannot shink stack")
 	}
 }
+
+func TestJMP(t *testing.T) {
+	cpu, _ := create()
+	cpu.Execute(decoder.Instruction{
+		Op:             decoder.JMP,
+		AddressingMode: decoder.Absolute,
+		Value:          0x2000,
+	})
+
+	if cpu.pc != 0x2000 {
+		t.Error("cannot jump expected point")
+	}
+}
+
+func TestJSR(t *testing.T) {
+	cpu, m := create()
+	cpu.pc = 0xcafe
+
+	cpu.Execute(decoder.Instruction{
+		Op:             decoder.JSR,
+		AddressingMode: decoder.Absolute,
+		Value:          0x3000,
+	})
+
+	if cpu.pc != 0x3000 {
+		t.Error("cannot jump expected point")
+	}
+
+	if m.Read16(0x01FE) != 0xcafe {
+		t.Errorf("cannot push current pc. %x", m.Read16(0x01FE))
+	}
+
+	if cpu.s != 0xFD {
+		t.Errorf("cannot push down stack: %x", cpu.s)
+	}
+
+	cpu.Execute(decoder.Instruction{
+		Op: decoder.RTS,
+	})
+
+	if cpu.pc != 0xcafe {
+		t.Errorf("cannot return expected point: %x", cpu.pc)
+	}
+
+	if cpu.s != 0xFF {
+		t.Error("cannot pop up stack")
+	}
+}
