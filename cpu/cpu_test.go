@@ -746,3 +746,67 @@ func TestJSR(t *testing.T) {
 		t.Error("cannot pop up stack")
 	}
 }
+
+func TestBranch(t *testing.T) {
+	tests := []struct {
+		op        decoder.Op
+		branch    status
+		nonBranch status
+	}{
+		{decoder.BCS, status{carry: true}, status{}},
+		{decoder.BCC, status{}, status{carry: true}},
+
+		{decoder.BEQ, status{zero: true}, status{}},
+		{decoder.BNE, status{}, status{zero: true}},
+
+		{decoder.BMI, status{negative: true}, status{}},
+		{decoder.BPL, status{}, status{negative: true}},
+
+		{decoder.BVS, status{overflow: true}, status{}},
+		{decoder.BVC, status{}, status{overflow: true}},
+	}
+
+	cpu, _ := create()
+	for n, test := range tests {
+		// negative
+		cpu.pc = 0xcafe
+		cpu.status = test.branch
+
+		cpu.Execute(decoder.Instruction{
+			Op:             test.op,
+			AddressingMode: decoder.Relative,
+			Value:          0xFF,
+		})
+
+		if cpu.pc != 0xcafd {
+			t.Errorf("%d: cannot branch before point", n)
+		}
+
+		// positive
+		cpu.pc = 0xcafe
+		cpu.status = test.branch
+
+		cpu.Execute(decoder.Instruction{
+			Op:             test.op,
+			AddressingMode: decoder.Relative,
+			Value:          0x1,
+		})
+
+		if cpu.pc != 0xcaff {
+			t.Errorf("%d: cannot branch after point: %x", n, cpu.pc)
+		}
+
+		// not jump
+		cpu.pc = 0xcafe
+		cpu.status = test.nonBranch
+		cpu.Execute(decoder.Instruction{
+			Op:             test.op,
+			AddressingMode: decoder.Relative,
+			Value:          0x80,
+		})
+
+		if cpu.pc != 0xcafe {
+			t.Errorf("%d: unexpected branch happen", n)
+		}
+	}
+}

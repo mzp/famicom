@@ -47,6 +47,8 @@ func (c *CPU) address(inst d.Instruction) uint16 {
 	case d.IndirectY:
 		address := c.memory.Read16(uint16(value))
 		return address + uint16(c.y)
+	case d.Relative:
+		return uint16(c.pc + int(int8(value)))
 	default:
 		panic("unknown addressing mode")
 	}
@@ -256,6 +258,38 @@ func (c *CPU) Execute(inst d.Instruction) {
 		value := c.memory.Read16(uint16(c.s) + 0x100)
 		c.s += 1
 		c.pc = int(value)
+	case d.BCS:
+		if c.status.carry {
+			c.pc = int(c.address(inst))
+		}
+	case d.BCC:
+		if !c.status.carry {
+			c.pc = int(c.address(inst))
+		}
+	case d.BEQ:
+		if c.status.zero {
+			c.pc = int(c.address(inst))
+		}
+	case d.BNE:
+		if !c.status.zero {
+			c.pc = int(c.address(inst))
+		}
+	case d.BMI:
+		if c.status.negative {
+			c.pc = int(c.address(inst))
+		}
+	case d.BPL:
+		if !c.status.negative {
+			c.pc = int(c.address(inst))
+		}
+	case d.BVS:
+		if c.status.overflow {
+			c.pc = int(c.address(inst))
+		}
+	case d.BVC:
+		if !c.status.overflow {
+			c.pc = int(c.address(inst))
+		}
 	default:
 		c.status = status{}
 	}
