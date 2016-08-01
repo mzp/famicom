@@ -258,6 +258,8 @@ func (c *CPU) Execute(inst d.Instruction) {
 		value := c.memory.Read16(uint16(c.s) + 0x100)
 		c.s += 1
 		c.pc = int(value)
+	case d.RTI:
+		panic("not implement")
 	case d.BCS:
 		if c.status.carry {
 			c.pc = int(c.address(inst))
@@ -300,6 +302,10 @@ func (c *CPU) Execute(inst d.Instruction) {
 		c.status.irq = false
 	case d.CLV:
 		c.status.overflow = false
+	case d.BRK:
+		panic("not implement")
+	case d.NOP:
+		// nothing to do
 	default:
 	}
 }
