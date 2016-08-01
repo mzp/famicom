@@ -810,3 +810,50 @@ func TestBranch(t *testing.T) {
 		}
 	}
 }
+
+func TestSetFlag(t *testing.T) {
+	tests := []struct {
+		op     decoder.Op
+		status status
+	}{
+		{decoder.SEC, status{carry: true}},
+		{decoder.SEI, status{irq: true}},
+	}
+
+	cpu, _ := create()
+	for n, test := range tests {
+		cpu.status = status{}
+
+		cpu.Execute(decoder.Instruction{
+			Op: test.op,
+		})
+
+		if cpu.status != test.status {
+			t.Errorf("%d: unexpected status flag %s", n, cpu.status.String())
+		}
+	}
+}
+
+func TestClearFlag(t *testing.T) {
+	tests := []struct {
+		op     decoder.Op
+		status status
+	}{
+		{decoder.CLC, status{carry: true}},
+		{decoder.CLI, status{irq: true}},
+		{decoder.CLV, status{overflow: true}},
+	}
+
+	cpu, _ := create()
+	for n, test := range tests {
+		cpu.status = test.status
+
+		cpu.Execute(decoder.Instruction{
+			Op: test.op,
+		})
+
+		if (cpu.status != status{}) {
+			t.Errorf("%d: clear status flag", n)
+		}
+	}
+}

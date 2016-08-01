@@ -290,8 +290,17 @@ func (c *CPU) Execute(inst d.Instruction) {
 		if !c.status.overflow {
 			c.pc = int(c.address(inst))
 		}
+	case d.SEC:
+		c.status.carry = true
+	case d.SEI:
+		c.status.irq = true
+	case d.CLC:
+		c.status.carry = false
+	case d.CLI:
+		c.status.irq = false
+	case d.CLV:
+		c.status.overflow = false
 	default:
-		c.status = status{}
 	}
 }
 
