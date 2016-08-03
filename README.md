@@ -23,6 +23,12 @@ Dump NES pallet data to PNG image.
 
 Disasm 6502 machine code.
 
+### famicom-cpu
+
+![](https://raw.githubusercontent.com/mzp/famicom/master/docs/images/famicom-cpu.png)
+
+6502 emulator. It can execute all instruction, and show register, memory.
+
 ## License
 
 MIT License
