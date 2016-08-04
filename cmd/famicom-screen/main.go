@@ -43,5 +43,10 @@ func ppc(path string) *ppu.PPU {
 	m := memory.New()
 	m.Load(0x0, rom.Character)
 
+	// FIXME: dummy output
+	for n, c := range "HELLO" {
+		m.Write(0x21c9+uint16(n), byte(c))
+	}
+
 	return ppu.New(m)
 }

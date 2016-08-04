@@ -17,5 +17,6 @@ func New(m *memlib.Memory) *PPU {
 
 func (*PPU) Render() image.Image {
 	img := image.NewRGBA(image.Rect(0, 0, 256, 240))
+
 	return img
 }
