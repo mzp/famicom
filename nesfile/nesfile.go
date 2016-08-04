@@ -1,8 +1,8 @@
 package nesfile
 
 type T struct {
-	program   []byte
-	character []byte
+	Program   []byte
+	Character []byte
 }
 
 const (
@@ -20,7 +20,7 @@ func Load(data []byte) T {
 	characterSize := int(data[5]) * characterSizeUnit
 
 	return T{
-		program:   get(data, headerSize, programSize),
-		character: get(data, headerSize+programSize, characterSize),
+		Program:   get(data, headerSize, programSize),
+		Character: get(data, headerSize+programSize, characterSize),
 	}
 }

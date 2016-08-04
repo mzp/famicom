@@ -35,19 +35,19 @@ func TestLoad(t *testing.T) {
 
 	file := Load(data[:])
 
-	if len(file.program) != 2*16*1024 {
-		t.Errorf("unmatch program size: %x", len(file.program))
+	if len(file.Program) != 2*16*1024 {
+		t.Errorf("unmatch program size: %x", len(file.Program))
 	}
 
-	if len(file.character) != 8*1024 {
-		t.Errorf("unmatch character size: %x", len(file.character))
+	if len(file.Character) != 8*1024 {
+		t.Errorf("unmatch character size: %x", len(file.Character))
 	}
 
-	if !startWith(file.program, []byte{0xca, 0xfe, 0xba, 0xbe}) {
-		t.Errorf("cannot load program rom: %v", file.program[0:16])
+	if !startWith(file.Program, []byte{0xca, 0xfe, 0xba, 0xbe}) {
+		t.Errorf("cannot load program rom: %v", file.Program[0:16])
 	}
 
-	if !startWith(file.character, []byte{0xde, 0xad, 0xbe, 0xef}) {
-		t.Errorf("cannot load character rom: %v", file.character[0:16])
+	if !startWith(file.Character, []byte{0xde, 0xad, 0xbe, 0xef}) {
+		t.Errorf("cannot load character rom: %v", file.Character[0:16])
 	}
 }
