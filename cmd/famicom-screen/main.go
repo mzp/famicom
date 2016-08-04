@@ -3,9 +3,13 @@ package main
 import (
 	"image"
 	_ "image/png"
+	"io/ioutil"
 	"os"
 	"runtime"
 
+	"github.com/mzp/famicom/memory"
+	"github.com/mzp/famicom/nesfile"
+	"github.com/mzp/famicom/ppu"
 	"github.com/mzp/famicom/window"
 )
 
@@ -16,25 +20,28 @@ func init() {
 }
 
 func main() {
-	img, err := load("square.png")
+	ppu := ppc(os.Args[1])
+
+	window.CreateWindow("Famicom", func() image.Image {
+		return ppu.Render()
+	})
+}
+
+func ppc(path string) *ppu.PPU {
+	file, err := os.Open(path)
+	if err != nil {
+		panic(err)
+	}
+	data, err := ioutil.ReadAll(file)
 
 	if err != nil {
 		panic(err)
 	}
 
-	window.CreateWindow("Famicom", func() image.Image {
-		return img
-	})
-}
+	rom := nesfile.Load(data)
 
-func load(file string) (image.Image, error) {
-	imgFile, err := os.Open(file)
-	if err != nil {
-		return nil, err
-	}
-	img, _, err := image.Decode(imgFile)
-	if err != nil {
-		return nil, err
-	}
-	return img, nil
+	m := memory.New()
+	m.Load(0x0, rom.Character)
+
+	return ppu.New(m)
 }
