@@ -40,7 +40,7 @@ func pattern(low, high []byte) Pattern {
 }
 
 func ReadFromBytes(data []byte) (Pattern, bool) {
-	low, high := data[0:UNIT_BYTES], data[UNIT_BYTES:]
+	low, high := data[0:UNIT_BYTES], data[UNIT_BYTES:UNIT_BYTES*2]
 
 	if len(low) == UNIT_BYTES && len(high) == UNIT_BYTES {
 		return pattern(low, high), true
@@ -69,5 +69,20 @@ func ReadAll(reader io.Reader) []Pattern {
 		patterns = append(patterns, x)
 	}
 
+	return patterns
+}
+
+func ReadAllFromBytes(data []byte) []Pattern {
+	patterns := []Pattern{}
+
+	for i := 0; i < len(data); i += READ_BYTES {
+		x, ok := ReadFromBytes(data[i:])
+
+		if !ok {
+			break
+		}
+
+		patterns = append(patterns, x)
+	}
 	return patterns
 }
