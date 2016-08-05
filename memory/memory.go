@@ -23,6 +23,10 @@ func (memory *Memory) Read16(address uint16) uint16 {
 	return uint16(high)<<8 | uint16(low)
 }
 
+func (memory *Memory) ReadRange(address uint16, size uint16) []byte {
+	return memory.Data[address : address+size]
+}
+
 func (memory *Memory) Write(address uint16, value byte) {
 	memory.Data[address] = value
 }

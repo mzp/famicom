@@ -35,3 +35,19 @@ func TestRead16(t *testing.T) {
 		t.Error()
 	}
 }
+
+func TestReadRange(t *testing.T) {
+	memory := New()
+	memory.Write(0x2000, 0xfe)
+	memory.Write(0x2001, 0xca)
+
+	data := memory.ReadRange(0x2000, 2)
+
+	if len(data) != 2 {
+		t.Error()
+	}
+
+	if data[0] != 0xfe && data[1] != 0xca {
+		t.Error()
+	}
+}
