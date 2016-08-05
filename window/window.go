@@ -43,16 +43,16 @@ func CreateWindow(title string, f func() image.Image) {
 
 		gl.Begin(gl.POLYGON)
 
-		gl.TexCoord2f(0, 0)
+		gl.TexCoord2f(0, 1)
 		gl.Vertex2f(-1, -1)
 
-		gl.TexCoord2f(0, 1)
+		gl.TexCoord2f(0, 0)
 		gl.Vertex2f(-1, 1)
 
-		gl.TexCoord2f(1, 1)
+		gl.TexCoord2f(1, 0)
 		gl.Vertex2f(1, 1)
 
-		gl.TexCoord2f(1, 0)
+		gl.TexCoord2f(1, 1)
 		gl.Vertex2f(1, -1)
 		gl.End()
 
