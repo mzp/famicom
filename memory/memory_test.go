@@ -34,5 +34,4 @@ func TestRead16(t *testing.T) {
 	if memory.Read16(0x2000) != 0xcafe {
 		t.Error()
 	}
-
 }
