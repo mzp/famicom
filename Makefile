@@ -5,7 +5,7 @@ CMD = famicom-disasm famicom-dump-image famicom-cpu famicom-screen
 .PHONY: build fmt clean
 
 build:
-	$(foreach cmd, $(CMD), go build -o build/$(cmd) cmd/$(cmd)/main.go ;)
+	@$(foreach cmd, $(CMD), echo go build -o build/$(cmd) cmd/$(cmd)/main.go ; go build -o build/$(cmd) cmd/$(cmd)/main.go ;)
 
 fmt:
 	go fmt github.com/mzp/famicom/...
