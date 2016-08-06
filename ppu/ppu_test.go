@@ -90,6 +90,7 @@ func TestPattern(t *testing.T) {
 	m.Load(0x0, load("../example/hello/hello.nes"))
 	m.Write(0x2000, 'H')
 	ppu := New(m)
+	ppu.SetControl2(0x8)
 
 	assertScreen(t, ppu)
 }
@@ -100,6 +101,26 @@ func TestScreenAddress(t *testing.T) {
 	m.Write(0x2400, 'H')
 	ppu := New(m)
 	ppu.SetControl1(1)
+	ppu.SetControl2(0x8)
 
 	assertScreen(t, ppu)
+}
+
+func TestBGShow(t *testing.T) {
+	m := memory.New()
+	m.Load(0x0, load("../example/hello/hello.nes"))
+	m.Write(0x2000, 'H')
+	ppu := New(m)
+	ppu.SetControl2(0)
+
+	screen := ppu.Render()
+
+	black := color.RGBA{0, 0, 0, 0}
+	for y := 0; y < 240; y++ {
+		for x := 0; x < 256; x++ {
+			if screen.At(x, y) != black {
+				t.Errorf("not black color: %v", screen.At(x, y))
+			}
+		}
+	}
 }

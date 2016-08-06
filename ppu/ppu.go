@@ -14,7 +14,10 @@ type PPU struct {
 	patterns   [2][]pattern.Pattern
 	bgPalettes [4][]color.Color
 	nameTable  uint16
+	background bool
 }
+
+var black = color.RGBA{0, 0, 0, 0xFF}
 
 func New(m *memlib.Memory) *PPU {
 	t := PPU{memory: m}
@@ -35,6 +38,7 @@ func (ppu *PPU) SetControl1(flag byte) {
 }
 
 func (ppu *PPU) SetControl2(flag byte) {
+	ppu.background = (flag & 0x08) != 0
 }
 
 func (ppu *PPU) screen() ([]byte, []byte) {
@@ -59,6 +63,7 @@ func getAttribute(attributeTable []byte, x, y int) byte {
 }
 
 func (ppu *PPU) Render() image.Image {
+
 	img := image.NewRGBA(image.Rect(0, 0, 256, 240))
 
 	nameTable, attributeTable := ppu.screen()
@@ -66,8 +71,10 @@ func (ppu *PPU) Render() image.Image {
 		x := n % 32
 		y := n / 32
 
-		paletteIndex := getAttribute(attributeTable, x, y)
-		pattern.PutImage(img, x*8, y*8, ppu.patterns[0][v], ppu.bgPalettes[paletteIndex])
+		if ppu.background {
+			paletteIndex := getAttribute(attributeTable, x, y)
+			pattern.PutImage(img, x*8, y*8, ppu.patterns[0][v], ppu.bgPalettes[paletteIndex])
+		}
 	}
 
 	return img
