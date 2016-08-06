@@ -20,14 +20,14 @@ func init() {
 }
 
 func main() {
-	ppu := ppc(os.Args[1])
+	ppu := create(os.Args[1], os.Args[2])
 
 	window.CreateWindow("Famicom", func() image.Image {
 		return ppu.Render()
 	})
 }
 
-func ppc(path string) *ppu.PPU {
+func create(path, title string) *ppu.PPU {
 	file, err := os.Open(path)
 	if err != nil {
 		panic(err)
@@ -43,9 +43,8 @@ func ppc(path string) *ppu.PPU {
 	m := memory.New()
 	m.Load(0x0, rom.Character)
 
-	// FIXME: dummy output
-	for n, c := range "HELLO" {
-		m.Write(0x21c9+uint16(n), byte(c))
+	for n, c := range title {
+		m.Write(0x2021+uint16(n), byte(c))
 	}
 
 	return ppu.New(m)
