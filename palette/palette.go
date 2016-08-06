@@ -2,7 +2,7 @@ package palette
 
 import "image/color"
 
-var colors = []color.RGBA{
+var colors = []color.Color{
 	color.RGBA{0x6D, 0x6D, 0x6D, 0xFF}, // 0x00
 	color.RGBA{0x00, 0x24, 0x91, 0xFF}, // 0x01
 	color.RGBA{0x00, 0x00, 0xDA, 0xFF}, // 0x02
@@ -69,8 +69,8 @@ var colors = []color.RGBA{
 	color.RGBA{0x00, 0x00, 0x00, 0xFF}, // 0x3F
 }
 
-func Read(data []byte) []color.RGBA {
-	var palette [4]color.RGBA
+func Read(data []byte) []color.Color {
+	var palette [4]color.Color
 
 	for i := 0; i < 4; i++ {
 		palette[i] = colors[data[i]]
