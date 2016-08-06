@@ -30,6 +30,12 @@ Disasm 6502 machine code.
 
 6502 emulator. It can execute all instruction, and show register, memory.
 
+### famicom-ppu
+
+![](https://raw.githubusercontent.com/mzp/famicom/master/docs/images/famicom-ppu.png)
+
+PPU emulator. It load `*.nes` file and show argumented text.
+
 ## License
 
 MIT License
