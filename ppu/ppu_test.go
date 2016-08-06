@@ -61,12 +61,7 @@ func TestLoadPalette(t *testing.T) {
 	}
 }
 
-func TestPattern(t *testing.T) {
-	m := memory.New()
-	m.Load(0x0, load("../example/hello/hello.nes"))
-	m.Write(0x2000, 'H')
-	ppu := New(m)
-
+func assertScreen(t *testing.T, ppu *PPU) {
 	expect := image.NewRGBA(image.Rect(0, 0, 8, 8))
 	pattern.PutImage(expect, 0, 0, ppu.patterns[0]['H'], ppu.bgPalettes[0])
 
@@ -88,4 +83,23 @@ func TestPattern(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestPattern(t *testing.T) {
+	m := memory.New()
+	m.Load(0x0, load("../example/hello/hello.nes"))
+	m.Write(0x2000, 'H')
+	ppu := New(m)
+
+	assertScreen(t, ppu)
+}
+
+func TestScreenAddress(t *testing.T) {
+	m := memory.New()
+	m.Load(0x0, load("../example/hello/hello.nes"))
+	m.Write(0x2400, 'H')
+	ppu := New(m)
+	ppu.SetControl1(1)
+
+	assertScreen(t, ppu)
 }

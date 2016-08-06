@@ -13,6 +13,7 @@ type PPU struct {
 	memory     *memlib.Memory
 	patterns   [2][]pattern.Pattern
 	bgPalettes [4][]color.Color
+	nameTable  uint16
 }
 
 func New(m *memlib.Memory) *PPU {
@@ -24,12 +25,26 @@ func New(m *memlib.Memory) *PPU {
 	t.bgPalettes[1] = palette.Read(m.ReadRange(0x3F04, 4))
 	t.bgPalettes[2] = palette.Read(m.ReadRange(0x3F08, 4))
 	t.bgPalettes[3] = palette.Read(m.ReadRange(0x3F0C, 4))
+
+	t.nameTable = 0x2000
 	return &t
 }
 
+func (ppu *PPU) SetControl1(flag byte) {
+	ppu.nameTable = 0x2000 + 0x400*uint16(flag&0x3)
+}
+
+func (ppu *PPU) SetControl2(flag byte) {
+}
+
 func (ppu *PPU) screen() ([]byte, []byte) {
-	nameTable := ppu.memory.ReadRange(0x2000, 0x3C0)
-	attributeTable := ppu.memory.ReadRange(0x23C0, 0x40)
+	const (
+		NameTableSize      = 0x3c0
+		AttributeTableSize = 0x40
+	)
+
+	nameTable := ppu.memory.ReadRange(ppu.nameTable, NameTableSize)
+	attributeTable := ppu.memory.ReadRange(ppu.nameTable+NameTableSize, AttributeTableSize)
 
 	return nameTable, attributeTable
 }
