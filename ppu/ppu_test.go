@@ -61,25 +61,16 @@ func TestLoadPalette(t *testing.T) {
 	}
 }
 
-func assertScreen(t *testing.T, ppu *PPU) {
+func assertScreen(t *testing.T, ppu *PPU, c byte, dx, dy int) {
 	expect := image.NewRGBA(image.Rect(0, 0, 8, 8))
-	pattern.PutImage(expect, 0, 0, ppu.patterns[0]['H'], ppu.bgPalettes[0])
+	pattern.PutImage(expect, 0, 0, ppu.patterns[0][c], ppu.bgPalettes[0])
 
 	screen := ppu.Render()
 
 	for y := 0; y < 8; y++ {
 		for x := 0; x < 8; x++ {
-			if screen.At(x, y) != expect.At(x, y) {
+			if screen.At(x+dx, y+dy) != expect.At(x, y) {
 				t.Errorf("unmatch color: %v %v", screen.At(x, y), expect.At(x, y))
-			}
-		}
-	}
-
-	black := color.RGBA{0, 0, 0, 0xFF}
-	for y := 0; y < 8; y++ {
-		for x := 0; x < 8; x++ {
-			if screen.At(x+8, y) != black {
-				t.Errorf("not black color: %v", screen.At(x, y))
 			}
 		}
 	}
@@ -92,7 +83,8 @@ func TestPattern(t *testing.T) {
 	ppu := New(m)
 	ppu.SetControl2(0x8)
 
-	assertScreen(t, ppu)
+	assertScreen(t, ppu, 'H', 0, 0)
+	assertScreen(t, ppu, ' ', 8, 0)
 }
 
 func TestScreenAddress(t *testing.T) {
@@ -103,7 +95,8 @@ func TestScreenAddress(t *testing.T) {
 	ppu.SetControl1(1)
 	ppu.SetControl2(0x8)
 
-	assertScreen(t, ppu)
+	assertScreen(t, ppu, 'H', 0, 0)
+	assertScreen(t, ppu, ' ', 8, 0)
 }
 
 func TestBGShow(t *testing.T) {
@@ -123,4 +116,37 @@ func TestBGShow(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestVRAWWriteX(t *testing.T) {
+	m := memory.New()
+	m.Load(0x0, load("../example/hello/hello.nes"))
+	ppu := New(m)
+	ppu.SetControl2(0x8)
+
+	ppu.SetAddress(0x20)
+	ppu.SetAddress(0x0)
+
+	ppu.WriteVRAM('H')
+	ppu.WriteVRAM('E')
+
+	assertScreen(t, ppu, 'H', 0, 0)
+	assertScreen(t, ppu, 'E', 8, 0)
+}
+
+func TestVRAWWriteY(t *testing.T) {
+	m := memory.New()
+	m.Load(0x0, load("../example/hello/hello.nes"))
+	ppu := New(m)
+	ppu.SetControl1(0x4)
+	ppu.SetControl2(0x8)
+
+	ppu.SetAddress(0x20)
+	ppu.SetAddress(0x0)
+
+	ppu.WriteVRAM('H')
+	ppu.WriteVRAM('E')
+
+	assertScreen(t, ppu, 'H', 0, 0)
+	assertScreen(t, ppu, 'E', 0, 8)
 }

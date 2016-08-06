@@ -10,11 +10,14 @@ import (
 )
 
 type PPU struct {
-	memory     *memlib.Memory
-	patterns   [2][]pattern.Pattern
-	bgPalettes [4][]color.Color
-	nameTable  uint16
-	background bool
+	memory      *memlib.Memory
+	patterns    [2][]pattern.Pattern
+	bgPalettes  [4][]color.Color
+	nameTable   uint16
+	background  bool
+	vramAddress uint16
+	vramHigh    bool
+	vramOffset  uint16
 }
 
 var black = color.RGBA{0, 0, 0, 0xFF}
@@ -30,15 +33,37 @@ func New(m *memlib.Memory) *PPU {
 	t.bgPalettes[3] = palette.Read(m.ReadRange(0x3F0C, 4))
 
 	t.nameTable = 0x2000
+	t.vramHigh = true
+	t.vramOffset = 1
 	return &t
 }
 
 func (ppu *PPU) SetControl1(flag byte) {
 	ppu.nameTable = 0x2000 + 0x400*uint16(flag&0x3)
+
+	if flag&0x4 != 0 {
+		ppu.vramOffset = 32
+	} else {
+		ppu.vramOffset = 1
+	}
 }
 
 func (ppu *PPU) SetControl2(flag byte) {
 	ppu.background = (flag & 0x08) != 0
+}
+
+func (ppu *PPU) SetAddress(data uint8) {
+	if ppu.vramHigh {
+		ppu.vramAddress = uint16(data) << 8
+		ppu.vramHigh = false
+	} else {
+		ppu.vramAddress |= uint16(data)
+	}
+}
+
+func (ppu *PPU) WriteVRAM(data uint8) {
+	ppu.memory.Write(ppu.vramAddress, data)
+	ppu.vramAddress += ppu.vramOffset
 }
 
 func (ppu *PPU) screen() ([]byte, []byte) {
