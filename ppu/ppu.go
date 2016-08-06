@@ -39,9 +39,7 @@ func (ppu *PPU) Render() image.Image {
 		x := n % 32
 		y := n / 32
 
-		if v != 0 {
-			pattern.PutImage(img, x*8, y*8, ppu.patterns[0][v], pallets)
-		}
+		pattern.PutImage(img, x*8, y*8, ppu.patterns[0][v], pallets)
 	}
 
 	return img
