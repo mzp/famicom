@@ -12,21 +12,6 @@ import (
 	"github.com/mzp/famicom/pattern"
 )
 
-func TestRenderSize(t *testing.T) {
-	m := memory.New()
-	ppu := New(m)
-
-	rect := ppu.Render().Bounds()
-
-	if (rect.Min != image.Point{0, 0}) {
-		t.Error()
-	}
-
-	if (rect.Max != image.Point{256, 240}) {
-		t.Error()
-	}
-}
-
 func load(path string) []byte {
 	file, err := os.Open(path)
 	if err != nil {
@@ -42,23 +27,48 @@ func load(path string) []byte {
 	return rom.Character
 }
 
+func TestRenderSize(t *testing.T) {
+	m := memory.New()
+	ppu := New(m)
+
+	rect := ppu.Render().Bounds()
+
+	if (rect.Min != image.Point{0, 0}) {
+		t.Error()
+	}
+
+	if (rect.Max != image.Point{256, 240}) {
+		t.Error()
+	}
+}
+
+func TestLoadPalette(t *testing.T) {
+	m := memory.New()
+	m.Load(0x0, load("../example/hello/hello.nes"))
+	ppu := New(m)
+
+	expect := []color.RGBA{
+		color.RGBA{0x00, 0x00, 0x00, 0xFF}, // 0x1F
+		color.RGBA{0x6D, 0x6D, 0x6D, 0xFF}, // 0x00
+		color.RGBA{0xB6, 0xB6, 0xB6, 0xFF}, // 0x10
+		color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, // 0x20
+	}
+
+	for n, c := range ppu.bgPalettes[0] {
+		if c != expect[n] {
+			t.Errorf("unmatch palette: %v %v", c, expect[n])
+		}
+	}
+}
+
 func TestPattern(t *testing.T) {
 	m := memory.New()
-	m.Load(0x0, load("../example/hello.nes"))
+	m.Load(0x0, load("../example/hello/hello.nes"))
 	m.Write(0x2000, 'H')
-	m.Write(0x2001, 0)
 	ppu := New(m)
 
 	expect := image.NewRGBA(image.Rect(0, 0, 8, 8))
-
-	palette := []color.Color{
-		color.RGBA{0, 0, 0, 0xFF},
-		color.RGBA{0xA0, 0xA0, 0xA0, 0xFF},
-		color.RGBA{0, 0xFF, 0, 0xFF},
-		color.RGBA{0xFF, 0xFF, 0xFF, 0xFF},
-	}
-
-	pattern.PutImage(expect, 0, 0, ppu.patterns[0]['H'], palette)
+	pattern.PutImage(expect, 0, 0, ppu.patterns[0]['H'], ppu.bgPalettes[0])
 
 	screen := ppu.Render()
 
@@ -74,7 +84,7 @@ func TestPattern(t *testing.T) {
 	for y := 0; y < 8; y++ {
 		for x := 0; x < 8; x++ {
 			if screen.At(x+8, y) != black {
-				t.Errorf("unmatch color: %v", screen.At(x, y))
+				t.Errorf("not black color: %v", screen.At(x, y))
 			}
 		}
 	}
