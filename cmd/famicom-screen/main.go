@@ -21,7 +21,7 @@ func init() {
 
 func main() {
 	ppu := create(os.Args[1], os.Args[2])
-
+	ppu.SetControl2(0x08)
 	window.CreateWindow("Famicom", func() image.Image {
 		return ppu.Render()
 	})
