@@ -10,14 +10,15 @@ import (
 )
 
 type PPU struct {
-	memory      *memlib.Memory
-	patterns    [2][]pattern.Pattern
-	bgPalettes  [4][]color.Color
-	nameTable   uint16
-	background  bool
-	vramAddress uint16
-	vramHigh    bool
-	vramOffset  uint16
+	memory          *memlib.Memory
+	patterns        [2][]pattern.Pattern
+	backgroundIndex int
+	bgPalettes      [4][]color.Color
+	nameTable       uint16
+	background      bool
+	vramAddress     uint16
+	vramHigh        bool
+	vramOffset      uint16
 }
 
 var black = color.RGBA{0, 0, 0, 0xFF}
@@ -45,6 +46,12 @@ func (ppu *PPU) SetControl1(flag byte) {
 		ppu.vramOffset = 32
 	} else {
 		ppu.vramOffset = 1
+	}
+
+	if flag&0x10 != 0 {
+		ppu.backgroundIndex = 1
+	} else {
+		ppu.backgroundIndex = 0
 	}
 }
 
@@ -98,7 +105,10 @@ func (ppu *PPU) Render() image.Image {
 
 		if ppu.background {
 			paletteIndex := getAttribute(attributeTable, x, y)
-			pattern.PutImage(img, x*8, y*8, ppu.patterns[0][v], ppu.bgPalettes[paletteIndex])
+			pattern.PutImage(img,
+				x*8, y*8,
+				ppu.patterns[ppu.backgroundIndex][v],
+				ppu.bgPalettes[paletteIndex])
 		}
 	}
 

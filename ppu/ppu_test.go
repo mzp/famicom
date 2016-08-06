@@ -150,3 +150,14 @@ func TestVRAWWriteY(t *testing.T) {
 	assertScreen(t, ppu, 'H', 0, 0)
 	assertScreen(t, ppu, 'E', 0, 8)
 }
+
+func TestPatternSelector(t *testing.T) {
+	m := memory.New()
+	m.Load(0x0, load("../example/hello/hello.nes"))
+	m.Write(0x2000, 'H')
+	ppu := New(m)
+	ppu.SetControl1(0x10)
+	ppu.SetControl2(0x8)
+
+	assertScreen(t, ppu, ' ', 0, 0)
+}
