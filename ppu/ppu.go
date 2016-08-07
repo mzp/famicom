@@ -33,6 +33,17 @@ func New(m *memlib.Memory) *PPU {
 	t := PPU{}
 	t.memory = m
 	t.spriteMemory = sprite.New()
+
+	t.nameTable = 0x2000
+	t.vramHigh = true
+	t.vramOffset = 1
+
+	t.refresh()
+	return &t
+}
+
+func (t *PPU) refresh() {
+	m := t.memory
 	t.patterns[0] = pattern.ReadAllFromBytes(m.ReadRange(0x0, 0x1000))
 	t.patterns[1] = pattern.ReadAllFromBytes(m.ReadRange(0x1000, 0x1000))
 
@@ -45,11 +56,6 @@ func New(m *memlib.Memory) *PPU {
 	t.spritePalettes[1] = palette.Read(m.ReadRange(0x3F14, 4))
 	t.spritePalettes[2] = palette.Read(m.ReadRange(0x3F18, 4))
 	t.spritePalettes[3] = palette.Read(m.ReadRange(0x3F1C, 4))
-
-	t.nameTable = 0x2000
-	t.vramHigh = true
-	t.vramOffset = 1
-	return &t
 }
 
 func (ppu *PPU) SetControl1(flag byte) {
@@ -123,8 +129,8 @@ func getAttribute(attributeTable []byte, x, y int) byte {
 }
 
 func (ppu *PPU) Render() image.Image {
-
 	img := image.NewRGBA(image.Rect(0, 0, 256, 240))
+	ppu.refresh()
 
 	nameTable, attributeTable := ppu.screen()
 	for n, v := range nameTable {
