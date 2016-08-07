@@ -4,6 +4,7 @@ import (
 	"image"
 	"image/color"
 
+	"github.com/mzp/famicom/bits"
 	memlib "github.com/mzp/famicom/memory"
 	"github.com/mzp/famicom/palette"
 	"github.com/mzp/famicom/pattern"
@@ -42,13 +43,13 @@ func New(m *memlib.Memory) *PPU {
 func (ppu *PPU) SetControl1(flag byte) {
 	ppu.nameTable = 0x2000 + 0x400*uint16(flag&0x3)
 
-	if flag&0x4 != 0 {
+	if bits.IsFlag(flag, 2) {
 		ppu.vramOffset = 32
 	} else {
 		ppu.vramOffset = 1
 	}
 
-	if flag&0x10 != 0 {
+	if bits.IsFlag(flag, 4) {
 		ppu.backgroundIndex = 1
 	} else {
 		ppu.backgroundIndex = 0
@@ -56,7 +57,7 @@ func (ppu *PPU) SetControl1(flag byte) {
 }
 
 func (ppu *PPU) SetControl2(flag byte) {
-	ppu.background = (flag & 0x08) != 0
+	ppu.background = bits.IsFlag(flag, 3)
 }
 
 func (ppu *PPU) SetAddress(data uint8) {

@@ -1,18 +1,22 @@
 package cpu
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/mzp/famicom/bits"
+)
 
 type status struct {
 	negative, overflow, brk, irq, zero, carry bool
 }
 
 func (s *status) set(flag uint8) {
-	s.negative = (flag & 0x80) != 0
-	s.overflow = (flag & 0x40) != 0
-	s.brk = (flag & 0x10) != 0
-	s.irq = (flag & 0x04) != 0
-	s.zero = (flag & 0x02) != 0
-	s.carry = (flag & 0x01) != 0
+	s.negative = bits.IsFlag(flag, 7)
+	s.overflow = bits.IsFlag(flag, 6)
+	s.brk = bits.IsFlag(flag, 4)
+	s.irq = bits.IsFlag(flag, 2)
+	s.zero = bits.IsFlag(flag, 1)
+	s.carry = bits.IsFlag(flag, 0)
 }
 
 func (s *status) uint8() uint8 {

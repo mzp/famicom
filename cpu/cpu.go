@@ -3,6 +3,7 @@ package cpu
 import (
 	"fmt"
 
+	"github.com/mzp/famicom/bits"
 	d "github.com/mzp/famicom/decoder"
 	memlib "github.com/mzp/famicom/memory"
 )
@@ -67,7 +68,7 @@ func (c *CPU) read(inst d.Instruction) uint8 {
 }
 
 func (cpu *CPU) nz(value uint8) {
-	cpu.status.negative = (0x80 & value) != 0
+	cpu.status.negative = bits.IsFlag(value, 7)
 	cpu.status.zero = value == 0
 }
 
@@ -114,17 +115,17 @@ func (c *CPU) shiftL(inst d.Instruction, carry bool) {
 	bit := uint8(toInt(carry))
 	if inst.AddressingMode == d.Accumlator {
 		ret := c.a<<1 | bit
-		c.status.negative = (0x80 & ret) != 0
+		c.status.negative = bits.IsFlag(ret, 7)
 		c.status.zero = ret == 0
-		c.status.carry = (c.a & 0x80) != 0
+		c.status.carry = bits.IsFlag(c.a, 7)
 		c.a = ret
 	} else {
 		address := c.address(inst)
 		value := c.memory.Read(address)
 		ret := value<<1 | bit
-		c.status.negative = (0x80 & ret) != 0
+		c.status.negative = bits.IsFlag(ret, 7)
 		c.status.zero = ret == 0
-		c.status.carry = (value & 0x80) != 0
+		c.status.carry = bits.IsFlag(value, 7)
 		c.memory.Write(address, ret)
 	}
 }
@@ -138,17 +139,17 @@ func (c *CPU) shiftR(inst d.Instruction, carry bool) {
 
 	if inst.AddressingMode == d.Accumlator {
 		ret := c.a>>1 | bit
-		c.status.negative = (0x80 & ret) != 0
+		c.status.negative = bits.IsFlag(ret, 7)
 		c.status.zero = ret == 0
-		c.status.carry = (c.a & 0x01) != 0
+		c.status.carry = bits.IsFlag(c.a, 0)
 		c.a = ret
 	} else {
 		address := c.address(inst)
 		value := c.memory.Read(address)
 		ret := value>>1 | bit
-		c.status.negative = (0x80 & ret) != 0
+		c.status.negative = bits.IsFlag(ret, 7)
 		c.status.zero = ret == 0
-		c.status.carry = (value & 0x01) != 0
+		c.status.carry = bits.IsFlag(value, 0)
 		c.memory.Write(address, ret)
 	}
 }
@@ -198,8 +199,8 @@ func (c *CPU) Execute(inst d.Instruction) {
 		c.shiftL(inst, false)
 	case d.BIT:
 		value := c.read(inst)
-		c.status.negative = value&0x80 != 0
-		c.status.overflow = value&0x40 != 0
+		c.status.negative = bits.IsFlag(value, 7)
+		c.status.overflow = bits.IsFlag(value, 6)
 		c.status.zero = c.a&value == 0
 	case d.CMP:
 		c.compare(c.a, inst)
