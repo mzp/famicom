@@ -42,7 +42,7 @@ func TestRenderSize(t *testing.T) {
 	}
 }
 
-func TestLoadPalette(t *testing.T) {
+func TestLoadBgPalette(t *testing.T) {
 	m := memory.New()
 	m.Load(0x0, load("../example/hello/hello.nes"))
 	ppu := New(m)
@@ -61,9 +61,9 @@ func TestLoadPalette(t *testing.T) {
 	}
 }
 
-func assertScreen(t *testing.T, ppu *PPU, c byte, dx, dy int) {
+func assertScreen(t *testing.T, ppu *PPU, c byte, dx, dy int, palette []color.Color) {
 	expect := image.NewRGBA(image.Rect(0, 0, 8, 8))
-	pattern.PutImage(expect, 0, 0, ppu.patterns[0][c], ppu.bgPalettes[0])
+	pattern.PutImage(expect, 0, 0, ppu.patterns[0][c], palette)
 
 	screen := ppu.Render()
 
@@ -83,8 +83,8 @@ func TestPattern(t *testing.T) {
 	ppu := New(m)
 	ppu.SetControl2(0x8)
 
-	assertScreen(t, ppu, 'H', 0, 0)
-	assertScreen(t, ppu, ' ', 8, 0)
+	assertScreen(t, ppu, 'H', 0, 0, ppu.bgPalettes[0])
+	assertScreen(t, ppu, ' ', 8, 0, ppu.bgPalettes[0])
 }
 
 func TestScreenAddress(t *testing.T) {
@@ -95,8 +95,8 @@ func TestScreenAddress(t *testing.T) {
 	ppu.SetControl1(1)
 	ppu.SetControl2(0x8)
 
-	assertScreen(t, ppu, 'H', 0, 0)
-	assertScreen(t, ppu, ' ', 8, 0)
+	assertScreen(t, ppu, 'H', 0, 0, ppu.bgPalettes[0])
+	assertScreen(t, ppu, ' ', 8, 0, ppu.bgPalettes[0])
 }
 
 func TestBGShow(t *testing.T) {
@@ -130,8 +130,8 @@ func TestVRAWWriteX(t *testing.T) {
 	ppu.WriteVRAM('H')
 	ppu.WriteVRAM('E')
 
-	assertScreen(t, ppu, 'H', 0, 0)
-	assertScreen(t, ppu, 'E', 8, 0)
+	assertScreen(t, ppu, 'H', 0, 0, ppu.bgPalettes[0])
+	assertScreen(t, ppu, 'E', 8, 0, ppu.bgPalettes[0])
 }
 
 func TestVRAWWriteY(t *testing.T) {
@@ -147,8 +147,8 @@ func TestVRAWWriteY(t *testing.T) {
 	ppu.WriteVRAM('H')
 	ppu.WriteVRAM('E')
 
-	assertScreen(t, ppu, 'H', 0, 0)
-	assertScreen(t, ppu, 'E', 0, 8)
+	assertScreen(t, ppu, 'H', 0, 0, ppu.bgPalettes[0])
+	assertScreen(t, ppu, 'E', 0, 8, ppu.bgPalettes[0])
 }
 
 func TestPatternSelector(t *testing.T) {
@@ -159,5 +159,43 @@ func TestPatternSelector(t *testing.T) {
 	ppu.SetControl1(0x10)
 	ppu.SetControl2(0x8)
 
-	assertScreen(t, ppu, ' ', 0, 0)
+	assertScreen(t, ppu, ' ', 0, 0, ppu.bgPalettes[0])
+}
+
+func TestLoadSpritePalette(t *testing.T) {
+	m := memory.New()
+	m.Load(0x0, load("../example/hello/hello.nes"))
+	ppu := New(m)
+
+	expect := []color.RGBA{
+		color.RGBA{0x00, 0x00, 0x00, 0xFF}, // 0x1F
+		color.RGBA{0xB6, 0x00, 0x6D, 0xFF}, // 0x05
+		color.RGBA{0xFF, 0x00, 0x91, 0xFF}, // 0x15
+		color.RGBA{0xFF, 0x6D, 0xFF, 0xFF}, // 0x25
+	}
+
+	if len(ppu.spritePalettes[0]) != 4 {
+		t.Error()
+	}
+
+	for n, c := range ppu.spritePalettes[0] {
+		if c != expect[n] {
+			t.Errorf("unmatch palette: %v %v", c, expect[n])
+		}
+	}
+}
+
+func TestSprite(t *testing.T) {
+	m := memory.New()
+	m.Load(0x0, load("../example/hello/hello.nes"))
+
+	ppu := New(m)
+	ppu.SetControl2(0x10)
+	ppu.SetSpriteAddress(0)
+	ppu.WriteSprite(10)
+	ppu.WriteSprite('H')
+	ppu.WriteSprite(0)
+	ppu.WriteSprite(20)
+
+	assertScreen(t, ppu, 'H', 20, 10, ppu.spritePalettes[0])
 }
