@@ -51,3 +51,23 @@ func TestReadRange(t *testing.T) {
 		t.Error()
 	}
 }
+
+func TestWriteTrap(t *testing.T) {
+	memory := New()
+	n := 0
+
+	memory.WriteTrap(0x2000, func(value byte) {
+		n += int(value)
+	})
+
+	memory.Write(0x2000, 1)
+
+	if n != 1 {
+		t.Error("cannot invoke write trap")
+	}
+
+	memory.Write(0x2001, 0xff)
+	if n != 1 {
+		t.Error("cannot over-invoke write trap")
+	}
+}

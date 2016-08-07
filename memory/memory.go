@@ -1,11 +1,13 @@
 package memory
 
 type Memory struct {
-	Data [0xFFFF]byte
+	Data      [0xFFFF]byte
+	writeTrap map[uint16]func(byte)
 }
 
 func New() *Memory {
 	var memory Memory
+	memory.writeTrap = map[uint16]func(byte){}
 	return &memory
 }
 
@@ -28,5 +30,15 @@ func (memory *Memory) ReadRange(address uint16, size uint16) []byte {
 }
 
 func (memory *Memory) Write(address uint16, value byte) {
-	memory.Data[address] = value
+	f, ok := memory.writeTrap[address]
+
+	if ok {
+		f(value)
+	} else {
+		memory.Data[address] = value
+	}
+}
+
+func (memory *Memory) WriteTrap(address uint16, f func(byte)) {
+	memory.writeTrap[address] = f
 }
