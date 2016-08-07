@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CMD = famicom-disasm famicom-dump-image famicom-cpu famicom-ppu
+CMD = famicom-disasm famicom-dump-image famicom-cpu famicom-ppu famicom
 
 .PHONY: build fmt clean
 
