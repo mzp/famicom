@@ -71,3 +71,17 @@ func TestWriteTrap(t *testing.T) {
 		t.Error("cannot over-invoke write trap")
 	}
 }
+
+func TestReadTrap(t *testing.T) {
+	memory := New()
+
+	memory.ReadTrap(0x2000, func() byte {
+		return 42
+	})
+
+	value := memory.Read(0x2000)
+
+	if value != 42 {
+		t.Error("cannot invoke read trap")
+	}
+}
