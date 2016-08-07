@@ -25,6 +25,7 @@ type PPU struct {
 	vramAddress     uint16
 	vramHigh        bool
 	vramOffset      uint16
+	rendering       bool
 }
 
 var black = color.RGBA{0, 0, 0, 0xFF}
@@ -128,9 +129,19 @@ func getAttribute(attributeTable []byte, x, y int) byte {
 	return (attribute >> uint(index*2)) & 0x3
 }
 
+func (ppu *PPU) startRender() {
+	ppu.refresh()
+	ppu.rendering = true
+}
+
+func (ppu *PPU) endRender() {
+	ppu.rendering = false
+}
+
 func (ppu *PPU) Render() image.Image {
 	img := image.NewRGBA(image.Rect(0, 0, 256, 240))
-	ppu.refresh()
+	ppu.startRender()
+	defer ppu.endRender()
 
 	nameTable, attributeTable := ppu.screen()
 	for n, v := range nameTable {
@@ -156,4 +167,12 @@ func (ppu *PPU) Render() image.Image {
 	}
 
 	return img
+}
+
+func (ppu *PPU) Status() byte {
+	if ppu.rendering {
+		return 0
+	} else {
+		return 0x80
+	}
 }

@@ -7,6 +7,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/mzp/famicom/bits"
 	"github.com/mzp/famicom/memory"
 	"github.com/mzp/famicom/nesfile"
 	"github.com/mzp/famicom/pattern"
@@ -198,4 +199,20 @@ func TestSprite(t *testing.T) {
 	ppu.WriteSprite(20)
 
 	assertScreen(t, ppu, 'H', 20, 10, ppu.spritePalettes[0])
+}
+
+func TestPPUStatus(t *testing.T) {
+	m := memory.New()
+	m.Load(0x0, load("../example/hello/hello.nes"))
+
+	ppu := New(m)
+
+	if !bits.IsFlag(ppu.Status(), 7) {
+		t.Error("on vblank")
+	}
+
+	ppu.rendering = true
+	if bits.IsFlag(ppu.Status(), 7) {
+		t.Error("on rendering")
+	}
 }

@@ -12,6 +12,9 @@ func Connect(memory *memory.Memory, ppu *ppu.PPU) {
 	memory.WriteTrap(0x2001, func(value byte) {
 		ppu.SetControl2(value)
 	})
+	memory.ReadTrap(0x2002, func() byte {
+		return ppu.Status()
+	})
 	memory.WriteTrap(0x2003, func(value byte) {
 		ppu.SetSpriteAddress(value)
 	})
