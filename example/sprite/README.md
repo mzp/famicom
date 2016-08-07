@@ -1,5 +1,3 @@
-# Hello world on NES
+# Sprite sample on NES
 
-hello world example for NES. This is forked from http://hp.vector.co.jp/authors/VA042397/nes/sample.html.
-
-
+http://gikofami.fc2web.com
