@@ -7,9 +7,12 @@ import (
 
 	"github.com/go-gl/gl/all-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
+	"github.com/mzp/famicom/pad"
 )
 
-func CreateWindow(title string, f func() image.Image) {
+type GetInput func(key glfw.Key) bool
+
+func CreateWindow(title string, f func(getInput GetInput) image.Image) {
 	err := glfw.Init()
 	if err != nil {
 		panic(err)
@@ -29,10 +32,14 @@ func CreateWindow(title string, f func() image.Image) {
 
 	gl.Enable(gl.TEXTURE_2D)
 
+	getInput := func(key glfw.Key) bool {
+		return window.GetKey(key) != glfw.Release
+	}
+
 	for !window.ShouldClose() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-		texture, err := newTexture(f())
+		texture, err := newTexture(f(getInput))
 
 		if err != nil {
 			panic(err)
