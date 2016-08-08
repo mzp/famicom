@@ -7,12 +7,12 @@ import (
 	"github.com/mzp/famicom/ppu"
 )
 
-func TestConnect(t *testing.T) {
+func TestConnectPPU(t *testing.T) {
 	cpuMemory := memory.New()
 	ppuMemory := memory.New()
 	p := ppu.New(ppuMemory)
 
-	Connect(cpuMemory, p)
+	ConnectPPU(cpuMemory, p)
 
 	cpuMemory.Write(0x2006, 0x20)
 	cpuMemory.Write(0x2006, 0x00)

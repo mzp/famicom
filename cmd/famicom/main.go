@@ -24,7 +24,9 @@ func init() {
 func main() {
 	rom := load(os.Args[1])
 	p := createPPU(rom)
-	c := createCPU(rom, p)
+	m, c := createCPU(rom)
+
+	ioregister.ConnectPPU(m, p)
 
 	go run(c)
 
@@ -53,11 +55,10 @@ func createPPU(rom nesfile.T) *ppu.PPU {
 	return ppu.New(m)
 }
 
-func createCPU(rom nesfile.T, ppu *ppu.PPU) *cpu.CPU {
+func createCPU(rom nesfile.T) (*memory.Memory, *cpu.CPU) {
 	m := memory.New()
-	ioregister.Connect(m, ppu)
 	m.Load(0x8000, rom.Program)
-	return cpu.New(m, 0x8000)
+	return m, cpu.New(m, 0x8000)
 }
 
 func run(c *cpu.CPU) {

@@ -2,10 +2,11 @@ package ioregister
 
 import (
 	"github.com/mzp/famicom/memory"
+	"github.com/mzp/famicom/pad"
 	"github.com/mzp/famicom/ppu"
 )
 
-func Connect(memory *memory.Memory, ppu *ppu.PPU) {
+func ConnectPPU(memory *memory.Memory, ppu *ppu.PPU) {
 	memory.WriteTrap(0x2000, func(value byte) {
 		ppu.SetControl1(value)
 	})
@@ -27,5 +28,21 @@ func Connect(memory *memory.Memory, ppu *ppu.PPU) {
 	})
 	memory.WriteTrap(0x2007, func(value byte) {
 		ppu.WriteVRAM(value)
+	})
+}
+
+func ConnectPad(memory *memory.Memory, pad1, pad2 *pad.Pad) {
+	memory.ReadTrap(0x4016, func() byte {
+		return pad1.Read()
+	})
+	memory.WriteTrap(0x4016, func(value byte) {
+		pad1.Write(value)
+	})
+
+	memory.ReadTrap(0x4017, func() byte {
+		return pad2.Read()
+	})
+	memory.WriteTrap(0x4017, func(value byte) {
+		pad2.Write(value)
 	})
 }
