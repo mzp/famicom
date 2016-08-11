@@ -2,6 +2,7 @@ package window
 
 import (
 	"fmt"
+	"time"
 	"image"
 	"image/draw"
 
@@ -63,6 +64,8 @@ func CreateWindow(title string, f func(getInput GetInput) image.Image) {
 		gl.End()
 
 		window.SwapBuffers()
+
+		time.Sleep(1000/60)
 		glfw.PollEvents()
 	}
 }
