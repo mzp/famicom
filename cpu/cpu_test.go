@@ -857,3 +857,15 @@ func TestClearFlag(t *testing.T) {
 		}
 	}
 }
+
+func TestBrk(t *testing.T) {
+	cpu, _ := create()
+
+	cpu.Execute(decoder.Instruction{
+		Op: decoder.BRK,
+	})
+
+	if cpu.interrupt != brk {
+		t.Error()
+	}
+}

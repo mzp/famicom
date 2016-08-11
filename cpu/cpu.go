@@ -8,11 +8,22 @@ import (
 	memlib "github.com/mzp/famicom/memory"
 )
 
+type interrupt int
+
+const (
+	none interrupt = iota
+	reset
+	nmi
+	irq
+	brk
+)
+
 type CPU struct {
 	memory     *memlib.Memory
 	pc         int
 	a, x, y, s byte
 	status     status
+	interrupt  interrupt
 }
 
 func New(m *memlib.Memory, start int) *CPU {
@@ -157,6 +168,22 @@ func (c *CPU) shiftR(inst d.Instruction, carry bool) {
 func (c *CPU) push(value uint8) {
 	c.memory.Write(uint16(c.s)+0x100, value)
 	c.s -= 1
+}
+
+func (c *CPU) InterrruptReset() {
+	c.interrupt = reset
+}
+
+func (c *CPU) InterrruptNMI() {
+	c.interrupt = nmi
+}
+
+func (c *CPU) InterrruptIrq() {
+	c.interrupt = irq
+}
+
+func (c *CPU) InterrruptBreak() {
+	c.interrupt = brk
 }
 
 func (c *CPU) Fetch() d.Instruction {
@@ -304,7 +331,7 @@ func (c *CPU) Execute(inst d.Instruction) {
 	case d.CLV:
 		c.status.overflow = false
 	case d.BRK:
-		panic("not implement")
+		c.interrupt = brk
 	case d.NOP:
 		// nothing to do
 	default:
@@ -312,7 +339,45 @@ func (c *CPU) Execute(inst d.Instruction) {
 }
 
 func (c *CPU) Step() {
-	c.Execute(c.Fetch())
+	switch c.interrupt {
+	case reset:
+		c.pc = int(c.memory.Read16(0xFFFC))
+		c.status.irq = true
+	case nmi:
+		c.push(uint8(c.pc >> 8))
+		c.push(uint8(c.pc))
+		c.push(c.status.uint8())
+		c.status.irq = true
+		c.status.brk = false
+		c.pc = int(c.memory.Read16(0xFFFA))
+	case irq:
+		if c.status.irq {
+			c.Execute(c.Fetch())
+		} else {
+			c.push(uint8(c.pc >> 8))
+			c.push(uint8(c.pc))
+			c.push(c.status.uint8())
+			c.status.irq = true
+			c.status.brk = false
+			c.pc = int(c.memory.Read16(0xFFFE))
+		}
+	case brk:
+		if c.status.irq {
+			c.Execute(c.Fetch())
+		} else {
+			c.push(uint8(c.pc >> 8))
+			c.push(uint8(c.pc))
+			c.push(c.status.uint8())
+			c.status.irq = true
+			c.status.brk = true
+			c.pc = int(c.memory.Read16(0xFFFE))
+		}
+	case none:
+		c.Execute(c.Fetch())
+	default:
+		panic("must not happen")
+	}
+	c.interrupt = none
 }
 
 func (c *CPU) String() string {
