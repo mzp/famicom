@@ -17,6 +17,7 @@ type PPU struct {
 	patterns        [2][]pattern.Pattern
 	spriteIndex     int
 	backgroundIndex int
+	interruptNMI    bool
 	bgPalettes      [4][]color.Color
 	spritePalettes  [4][]color.Color
 	nameTable       uint16
@@ -79,6 +80,8 @@ func (ppu *PPU) SetControl1(flag byte) {
 	} else {
 		ppu.backgroundIndex = 0
 	}
+
+	ppu.interruptNMI = bits.IsFlag(flag, 7)
 }
 
 func (ppu *PPU) SetControl2(flag byte) {
@@ -179,4 +182,8 @@ func (ppu *PPU) Status() byte {
 
 func (ppu *PPU) CopySpriteDMA(data []byte) {
 	ppu.spriteMemory.Copy(data)
+}
+
+func (ppu *PPU) IsInterrupNMI() bool {
+	return ppu.interruptNMI
 }

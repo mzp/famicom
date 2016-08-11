@@ -36,11 +36,17 @@ func main() {
 
 	c.InterrruptReset()
 
-	go run(c)
+	vblank := make(chan bool)
+
+	go run(c, vblank)
 
 	window.CreateWindow("Famicom", func(getInput window.GetInput) image.Image {
+		texture := p.Render()
+		if p.IsInterrupNMI() {
+			vblank <- true
+		}
 		scanPad(pad1, pad2, getInput)
-		return p.Render()
+		return texture
 	})
 }
 
@@ -70,9 +76,14 @@ func createCPU(rom nesfile.T) (*memory.Memory, *cpu.CPU) {
 	return m, cpu.New(m, 0)
 }
 
-func run(c *cpu.CPU) {
+func run(c *cpu.CPU, vblank chan bool) {
 	for {
-		c.Step()
+		select {
+		case <- vblank:
+			c.InterrruptNMI()
+		default:
+			c.Step()
+		}
 	}
 }
 
