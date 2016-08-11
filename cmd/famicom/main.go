@@ -34,6 +34,8 @@ func main() {
 	ioregister.ConnectPPU(m, p)
 	ioregister.ConnectPad(m, pad1, pad2)
 
+	c.InterrruptReset()
+
 	go run(c)
 
 	window.CreateWindow("Famicom", func(getInput window.GetInput) image.Image {
@@ -65,7 +67,7 @@ func createPPU(rom nesfile.T) *ppu.PPU {
 func createCPU(rom nesfile.T) (*memory.Memory, *cpu.CPU) {
 	m := memory.New()
 	m.Load(0x8000, rom.Program)
-	return m, cpu.New(m, 0x8000)
+	return m, cpu.New(m, 0)
 }
 
 func run(c *cpu.CPU) {
