@@ -39,8 +39,12 @@ func main() {
 	go run(c)
 
 	window.CreateWindow("Famicom", func(getInput window.GetInput) image.Image {
+		texture := p.Render()
+		if p.IsInterrupNMI() {
+			c.InterrruptNMI()
+		}
 		scanPad(pad1, pad2, getInput)
-		return p.Render()
+		return texture
 	})
 }
 
