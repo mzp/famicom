@@ -54,3 +54,7 @@ func (t *SpriteMemory) Get() []Sprite {
 
 	return xs[:]
 }
+
+func (t *SpriteMemory) Copy(data []byte) {
+	t.memory.Load(0, data)
+}

@@ -176,3 +176,7 @@ func (ppu *PPU) Status() byte {
 		return 0x80
 	}
 }
+
+func (ppu *PPU) CopySpriteDMA(data []byte) {
+	ppu.spriteMemory.Copy(data)
+}

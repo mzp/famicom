@@ -34,6 +34,11 @@ func ConnectPPU(memory *memory.Memory, ppu *ppu.PPU) {
 	memory.WriteTrap(0x2008, func(value byte) {
 		fmt.Println(value)
 	})
+
+	memory.WriteTrap(0x4014, func(value byte) {
+		data := memory.ReadRange(uint16(value) << 8, 0xFF)
+		ppu.CopySpriteDMA(data)
+	})
 }
 
 func ConnectPad(memory *memory.Memory, pad1, pad2 *pad.Pad) {
