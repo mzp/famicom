@@ -1,7 +1,7 @@
 package memory
 
 type Memory struct {
-	Data      [0xFFFF]byte
+	Data      [0x10000]byte
 	writeTrap map[uint16]func(byte)
 	readTrap  map[uint16]func() byte
 }
