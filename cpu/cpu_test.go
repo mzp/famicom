@@ -869,3 +869,23 @@ func TestBrk(t *testing.T) {
 		t.Error()
 	}
 }
+
+func TestRti(t *testing.T) {
+	cpu, _ := create()
+
+	cpu.push(0x80)
+	cpu.push(0xca)
+	cpu.push(0xfe)
+
+	cpu.Execute(decoder.Instruction{
+		Op: decoder.RTI,
+	})
+
+	if cpu.pc != 0xcafe {
+		t.Errorf("%x", cpu.pc)
+	}
+
+	if !cpu.status.negative {
+		t.Error()
+	}
+}

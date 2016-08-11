@@ -287,7 +287,13 @@ func (c *CPU) Execute(inst d.Instruction) {
 		c.s += 1
 		c.pc = int(value)
 	case d.RTI:
-		panic("not implement")
+		c.s += 1
+		pc := c.memory.Read16(uint16(c.s) + 0x100)
+		c.s += 1
+		status := c.memory.Read(uint16(c.s) + 0x100)
+		c.s += 1
+		c.pc = int(pc)
+		c.status.set(status)
 	case d.BCS:
 		if c.status.carry {
 			c.pc = int(c.address(inst))
