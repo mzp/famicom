@@ -45,6 +45,12 @@ func New(m *memlib.Memory) *PPU {
 
 func (t *PPU) refresh() {
 	m := t.memory
+
+	m.SetMirror(0x3F00, 0x3F10, 1)
+	m.SetMirror(0x3F04, 0x3F14, 1)
+	m.SetMirror(0x3F08, 0x3F18, 1)
+	m.SetMirror(0x3F0C, 0x3F1C, 1)
+
 	t.patterns[0] = pattern.ReadAllFromBytes(m.ReadRange(0x0, 0x1000))
 	t.patterns[1] = pattern.ReadAllFromBytes(m.ReadRange(0x1000, 0x1000))
 
