@@ -50,4 +50,8 @@ func TestLoad(t *testing.T) {
 	if !startWith(file.Character, []byte{0xde, 0xad, 0xbe, 0xef}) {
 		t.Errorf("cannot load character rom: %v", file.Character[0:16])
 	}
+
+	if !file.VerticalMirror {
+		t.Error("cannot read vertical mirror flag")
+	}
 }

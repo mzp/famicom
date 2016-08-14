@@ -26,6 +26,7 @@ func init() {
 func main() {
 	rom := load(os.Args[1])
 	p := createPPU(rom)
+	p.VerticalMirror = rom.VerticalMirror
 	m, c := createCPU(rom)
 
 	pad1 := pad.New()

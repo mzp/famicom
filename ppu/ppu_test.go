@@ -99,6 +99,7 @@ func TestScreenAddress(t *testing.T) {
 	ppu := New(m)
 	ppu.SetControl1(1)
 	ppu.SetControl2(0x8)
+	ppu.VerticalMirror = true
 
 	assertScreen(t, ppu, 'H', 0, 0, ppu.bgPalettes[0])
 	assertScreen(t, ppu, ' ', 8, 0, ppu.bgPalettes[0])
@@ -219,4 +220,15 @@ func TestPPUStatus(t *testing.T) {
 	if bits.IsFlag(ppu.Status(), 7) {
 		t.Error("on rendering")
 	}
+}
+
+func TestMirror(t *testing.T) {
+	m := memory.New()
+	m.Load(0x0, load("../example/hello/hello.nes"))
+	m.Write(0x2000, 'H')
+	ppu := New(m)
+	ppu.SetControl2(0x8)
+
+	assertScreen(t, ppu, 'H', 0, 0, ppu.bgPalettes[0])
+	assertScreen(t, ppu, ' ', 8, 0, ppu.bgPalettes[0])
 }

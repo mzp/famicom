@@ -12,6 +12,7 @@ import (
 )
 
 type PPU struct {
+	VerticalMirror   bool
 	memory           *memlib.Memory
 	spriteMemory     *sprite.SpriteMemory
 	patterns         [2][]pattern.Pattern
@@ -127,19 +128,37 @@ func (ppu *PPU) Render() image.Image {
 
 	var img *image.RGBA
 	if ppu.background {
-		background := renderBackground(ppu,
-			[4][]byte{
-				ppu.memory.ReadRange(0x2000, 0x3c0),
-				ppu.memory.ReadRange(0x2400, 0x3c0),
-				ppu.memory.ReadRange(0x2800, 0x3c0),
-				ppu.memory.ReadRange(0x2c00, 0x3c0),
-			},
-			[4][]byte{
-				ppu.memory.ReadRange(0x23c0, 0x40),
-				ppu.memory.ReadRange(0x27c0, 0x40),
-				ppu.memory.ReadRange(0x2bc0, 0x40),
-				ppu.memory.ReadRange(0x2fc0, 0x40),
-			})
+		var background *image.RGBA
+
+		if ppu.VerticalMirror {
+			background = renderBackground(ppu,
+				[4][]byte{
+					ppu.memory.ReadRange(0x2000, 0x3c0),
+					ppu.memory.ReadRange(0x2400, 0x3c0),
+					ppu.memory.ReadRange(0x2000, 0x3c0),
+					ppu.memory.ReadRange(0x2400, 0x3c0),
+				},
+				[4][]byte{
+					ppu.memory.ReadRange(0x23c0, 0x40),
+					ppu.memory.ReadRange(0x27c0, 0x40),
+					ppu.memory.ReadRange(0x23c0, 0x40),
+					ppu.memory.ReadRange(0x27c0, 0x40),
+				})
+		} else {
+			background = renderBackground(ppu,
+				[4][]byte{
+					ppu.memory.ReadRange(0x2000, 0x3c0),
+					ppu.memory.ReadRange(0x2000, 0x3c0),
+					ppu.memory.ReadRange(0x2800, 0x3c0),
+					ppu.memory.ReadRange(0x2800, 0x3c0),
+				},
+				[4][]byte{
+					ppu.memory.ReadRange(0x23c0, 0x40),
+					ppu.memory.ReadRange(0x23c0, 0x40),
+					ppu.memory.ReadRange(0x2bc0, 0x40),
+					ppu.memory.ReadRange(0x2bc0, 0x40),
+				})
+		}
 		img = background.SubImage(image.Rect(
 			ppu.originX*WIDTH,
 			ppu.originY*HEIGHT,
