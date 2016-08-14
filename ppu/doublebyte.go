@@ -20,3 +20,7 @@ func (self *doubleByte) Set(value uint16) {
 	self.data[0] = uint8(value >> 8)
 	self.data[1] = uint8(value)
 }
+
+func (self *doubleByte) Reset() {
+	self.index = 0
+}

@@ -24,7 +24,9 @@ func ConnectPPU(memory *memory.Memory, ppu *ppu.PPU) {
 	memory.WriteTrap(0x2004, func(value byte) {
 		ppu.WriteSprite(value)
 	})
-
+	memory.WriteTrap(0x2005, func(value byte) {
+		ppu.SetScroll(value)
+	})
 	memory.WriteTrap(0x2006, func(value byte) {
 		ppu.SetAddress(value)
 	})

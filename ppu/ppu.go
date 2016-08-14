@@ -22,6 +22,7 @@ type PPU struct {
 	bgPalettes       [4][]color.Color
 	spritePalettes   [4][]color.Color
 	originX, originY int
+	scroll           doubleByte
 	sprite           bool
 	background       bool
 	vramAddress      doubleByte
@@ -116,12 +117,27 @@ func (ppu *PPU) endRender() {
 	ppu.rendering = false
 }
 
+func wrap(n, m int) int {
+	if n >= 0 {
+		return n % m
+	} else {
+		return m + n
+	}
+}
+
 func clip(img *image.RGBA, x, y, width, height int) *image.RGBA {
-	return img.SubImage(image.Rect(
-		x,
-		y,
-		x+width,
-		y+height)).(*image.RGBA)
+	result := image.NewRGBA(image.Rect(0, 0, width, height))
+	bounds := img.Bounds()
+	originalWidth := bounds.Max.X - bounds.Min.X
+	originalHeight := bounds.Max.Y - bounds.Min.Y
+
+	for j := 0; j < height; j++ {
+		for i := 0; i < width; i++ {
+			c := img.At(wrap(x+i, originalWidth), wrap(y+j, originalHeight))
+			result.Set(i, j, c)
+		}
+	}
+	return result
 }
 
 func (ppu *PPU) Render() image.Image {
@@ -162,8 +178,8 @@ func (ppu *PPU) Render() image.Image {
 				})
 		}
 		img = clip(background,
-			ppu.originX*WIDTH,
-			ppu.originY*HEIGHT,
+			ppu.originX*WIDTH+int(ppu.scroll.data[0]),
+			ppu.originY*HEIGHT+int(ppu.scroll.data[1]),
 			WIDTH,
 			HEIGHT)
 	} else {
@@ -173,8 +189,8 @@ func (ppu *PPU) Render() image.Image {
 	if ppu.sprite {
 		for _, sp := range ppu.spriteMemory.Get() {
 			pattern.PutImage(img,
-				img.Rect.Min.X+int(sp.X),
-				img.Rect.Min.Y+int(sp.Y),
+				int(sp.X),
+				int(sp.Y),
 				ppu.patterns[ppu.spriteIndex][sp.Pattern],
 				ppu.spritePalettes[sp.Palette])
 		}
@@ -184,6 +200,7 @@ func (ppu *PPU) Render() image.Image {
 }
 
 func (ppu *PPU) Status() byte {
+	ppu.scroll.Reset()
 	if ppu.rendering {
 		return 0
 	} else {
@@ -197,4 +214,8 @@ func (ppu *PPU) CopySpriteDMA(data []byte) {
 
 func (ppu *PPU) IsInterrupNMI() bool {
 	return ppu.interruptNMI
+}
+
+func (ppu *PPU) SetScroll(value byte) {
+	ppu.scroll.Write(value)
 }

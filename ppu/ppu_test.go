@@ -248,3 +248,15 @@ func TestMirror(t *testing.T) {
 	assertScreen(t, ppu, 'H', 0, 0, ppu.bgPalettes[0])
 	assertScreen(t, ppu, ' ', 8, 0, ppu.bgPalettes[0])
 }
+
+func TestScroll(t *testing.T) {
+	m := memory.New()
+	m.Load(0x0, load("../example/hello/hello.nes"))
+	m.Write(0x2001, 'H')
+	ppu := New(m)
+	ppu.SetControl2(0x8)
+
+	ppu.SetScroll(1)
+	ppu.SetScroll(0)
+	assertScreen(t, ppu, 'H', 7, 0, ppu.bgPalettes[0])
+}
