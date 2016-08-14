@@ -24,8 +24,7 @@ type PPU struct {
 	originX, originY int
 	sprite           bool
 	background       bool
-	vramAddress      uint16
-	vramHigh         bool
+	vramAddress      doubleByte
 	vramOffset       uint16
 	rendering        bool
 }
@@ -37,7 +36,6 @@ func New(m *memlib.Memory) *PPU {
 	t.memory = m
 	t.spriteMemory = sprite.New()
 
-	t.vramHigh = true
 	t.vramOffset = 1
 
 	t.refresh()
@@ -100,18 +98,13 @@ func (ppu *PPU) WriteSprite(value byte) {
 }
 
 func (ppu *PPU) SetAddress(data uint8) {
-	if ppu.vramHigh {
-		ppu.vramAddress = uint16(data) << 8
-		ppu.vramHigh = false
-	} else {
-		ppu.vramAddress |= uint16(data)
-		ppu.vramHigh = true
-	}
+	ppu.vramAddress.Write(data)
 }
 
 func (ppu *PPU) WriteVRAM(data uint8) {
-	ppu.memory.Write(ppu.vramAddress, data)
-	ppu.vramAddress += ppu.vramOffset
+	address := ppu.vramAddress.Value()
+	ppu.memory.Write(address, data)
+	ppu.vramAddress.Set(address + ppu.vramOffset)
 }
 
 func (ppu *PPU) startRender() {

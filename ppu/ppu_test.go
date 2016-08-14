@@ -162,13 +162,13 @@ func TestSetAddress(t *testing.T) {
 	ppu := New(m)
 	ppu.SetAddress(0x20)
 	ppu.SetAddress(0x0)
-	if ppu.vramAddress != 0x2000 {
+	if ppu.vramAddress.Value() != 0x2000 {
 		t.Errorf("expect 0x2000 but %x", ppu.vramAddress)
 	}
 
 	ppu.SetAddress(0xca)
 	ppu.SetAddress(0xfe)
-	if ppu.vramAddress != 0xcafe {
+	if ppu.vramAddress.Value() != 0xcafe {
 		t.Errorf("expect 0xcafe but %x", ppu.vramAddress)
 	}
 }
