@@ -116,6 +116,14 @@ func (ppu *PPU) endRender() {
 	ppu.rendering = false
 }
 
+func clip(img *image.RGBA, x, y, width, height int) *image.RGBA {
+	return img.SubImage(image.Rect(
+		x,
+		y,
+		x+width,
+		y+height)).(*image.RGBA)
+}
+
 func (ppu *PPU) Render() image.Image {
 	ppu.startRender()
 	defer ppu.endRender()
@@ -153,11 +161,11 @@ func (ppu *PPU) Render() image.Image {
 					ppu.memory.ReadRange(0x2bc0, 0x40),
 				})
 		}
-		img = background.SubImage(image.Rect(
+		img = clip(background,
 			ppu.originX*WIDTH,
 			ppu.originY*HEIGHT,
-			(ppu.originX+1)*WIDTH,
-			(ppu.originY+1)*HEIGHT)).(*image.RGBA)
+			WIDTH,
+			HEIGHT)
 	} else {
 		img = image.NewRGBA(image.Rect(0, 0, WIDTH, HEIGHT))
 	}
