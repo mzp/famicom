@@ -12,21 +12,21 @@ import (
 )
 
 type PPU struct {
-	memory          *memlib.Memory
-	spriteMemory    *sprite.SpriteMemory
-	patterns        [2][]pattern.Pattern
-	spriteIndex     int
-	backgroundIndex int
-	interruptNMI    bool
-	bgPalettes      [4][]color.Color
-	spritePalettes  [4][]color.Color
-	nameTable       uint16
-	sprite          bool
-	background      bool
-	vramAddress     uint16
-	vramHigh        bool
-	vramOffset      uint16
-	rendering       bool
+	memory           *memlib.Memory
+	spriteMemory     *sprite.SpriteMemory
+	patterns         [2][]pattern.Pattern
+	spriteIndex      int
+	backgroundIndex  int
+	interruptNMI     bool
+	bgPalettes       [4][]color.Color
+	spritePalettes   [4][]color.Color
+	originX, originY int
+	sprite           bool
+	background       bool
+	vramAddress      uint16
+	vramHigh         bool
+	vramOffset       uint16
+	rendering        bool
 }
 
 var black = color.RGBA{0, 0, 0, 0xFF}
@@ -36,7 +36,6 @@ func New(m *memlib.Memory) *PPU {
 	t.memory = m
 	t.spriteMemory = sprite.New()
 
-	t.nameTable = 0x2000
 	t.vramHigh = true
 	t.vramOffset = 1
 
@@ -61,7 +60,9 @@ func (t *PPU) refresh() {
 }
 
 func (ppu *PPU) SetControl1(flag byte) {
-	ppu.nameTable = 0x2000 + 0x400*uint16(flag&0x3)
+	origin := int(flag & 0x3)
+	ppu.originX = origin % 2
+	ppu.originY = origin / 2
 
 	if bits.IsFlag(flag, 2) {
 		ppu.vramOffset = 32
@@ -111,27 +112,6 @@ func (ppu *PPU) WriteVRAM(data uint8) {
 	ppu.vramAddress += ppu.vramOffset
 }
 
-func (ppu *PPU) screen() ([]byte, []byte) {
-	const (
-		NameTableSize      = 0x3c0
-		AttributeTableSize = 0x40
-	)
-
-	nameTable := ppu.memory.ReadRange(ppu.nameTable, NameTableSize)
-	attributeTable := ppu.memory.ReadRange(ppu.nameTable+NameTableSize, AttributeTableSize)
-
-	return nameTable, attributeTable
-}
-
-func getAttribute(attributeTable []byte, x, y int) byte {
-	attribute := attributeTable[x/4+y/4*8]
-
-	x_, y_ := x%4, y%4
-	index := (x_ / 2) + (y_/2)*2
-
-	return (attribute >> uint(index*2)) & 0x3
-}
-
 func (ppu *PPU) startRender() {
 	ppu.refresh()
 	ppu.rendering = true
@@ -142,28 +122,38 @@ func (ppu *PPU) endRender() {
 }
 
 func (ppu *PPU) Render() image.Image {
-	img := image.NewRGBA(image.Rect(0, 0, 256, 240))
 	ppu.startRender()
 	defer ppu.endRender()
 
-	nameTable, attributeTable := ppu.screen()
-	for n, v := range nameTable {
-		x := n % 32
-		y := n / 32
-
-		if ppu.background {
-			paletteIndex := getAttribute(attributeTable, x, y)
-			pattern.PutImage(img,
-				x*8, y*8,
-				ppu.patterns[ppu.backgroundIndex][v],
-				ppu.bgPalettes[paletteIndex])
-		}
+	var img *image.RGBA
+	if ppu.background {
+		background := renderBackground(ppu,
+			[4][]byte{
+				ppu.memory.ReadRange(0x2000, 0x3c0),
+				ppu.memory.ReadRange(0x2400, 0x3c0),
+				ppu.memory.ReadRange(0x2800, 0x3c0),
+				ppu.memory.ReadRange(0x2c00, 0x3c0),
+			},
+			[4][]byte{
+				ppu.memory.ReadRange(0x23c0, 0x40),
+				ppu.memory.ReadRange(0x27c0, 0x40),
+				ppu.memory.ReadRange(0x2bc0, 0x40),
+				ppu.memory.ReadRange(0x2fc0, 0x40),
+			})
+		img = background.SubImage(image.Rect(
+			ppu.originX*WIDTH,
+			ppu.originY*HEIGHT,
+			(ppu.originX+1)*WIDTH,
+			(ppu.originY+1)*HEIGHT)).(*image.RGBA)
+	} else {
+		img = image.NewRGBA(image.Rect(0, 0, WIDTH, HEIGHT))
 	}
 
 	if ppu.sprite {
 		for _, sp := range ppu.spriteMemory.Get() {
 			pattern.PutImage(img,
-				int(sp.X), int(sp.Y),
+				img.Rect.Min.X+int(sp.X),
+				img.Rect.Min.Y+int(sp.Y),
 				ppu.patterns[ppu.spriteIndex][sp.Pattern],
 				ppu.spritePalettes[sp.Palette])
 		}

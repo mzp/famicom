@@ -62,6 +62,10 @@ func TestLoadBgPalette(t *testing.T) {
 	}
 }
 
+func at(img image.Image, x, y int) color.Color {
+	return img.At(img.Bounds().Min.X+x, img.Bounds().Min.Y+y)
+}
+
 func assertScreen(t *testing.T, ppu *PPU, c byte, dx, dy int, palette []color.Color) {
 	expect := image.NewRGBA(image.Rect(0, 0, 8, 8))
 	pattern.PutImage(expect, 0, 0, ppu.patterns[0][c], palette)
@@ -70,8 +74,8 @@ func assertScreen(t *testing.T, ppu *PPU, c byte, dx, dy int, palette []color.Co
 
 	for y := 0; y < 8; y++ {
 		for x := 0; x < 8; x++ {
-			if screen.At(x+dx, y+dy) != expect.At(x, y) {
-				t.Errorf("unmatch color: %v %v", screen.At(x, y), expect.At(x, y))
+			if at(screen, x+dx, y+dy) != expect.At(x, y) {
+				t.Errorf("unmatch color: %v %v", at(screen, x+dx, y+dy), expect.At(x, y))
 			}
 		}
 	}
