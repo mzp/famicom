@@ -278,14 +278,15 @@ func (c *CPU) Execute(inst d.Instruction) {
 	case d.JMP:
 		c.pc = int(c.address(inst))
 	case d.JSR:
-		c.push(uint8(c.pc >> 8))
-		c.push(uint8(c.pc))
+		pc := c.pc - 1
+		c.push(uint8(pc >> 8))
+		c.push(uint8(pc))
 		c.pc = int(c.address(inst))
 	case d.RTS:
 		c.s += 1
 		value := c.memory.Read16(uint16(c.s) + 0x100)
 		c.s += 1
-		c.pc = int(value)
+		c.pc = int(value) + 1
 	case d.RTI:
 		c.s += 1
 		status := c.memory.Read(uint16(c.s) + 0x100)

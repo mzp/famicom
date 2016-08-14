@@ -726,7 +726,7 @@ func TestJSR(t *testing.T) {
 		t.Error("cannot jump expected point")
 	}
 
-	if m.Read16(0x01FE) != 0xcafe {
+	if m.Read16(0x01FE) != 0xcafd {
 		t.Errorf("cannot push current pc. %x", m.Read16(0x01FE))
 	}
 
