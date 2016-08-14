@@ -2,9 +2,9 @@ package window
 
 import (
 	"fmt"
-	"time"
 	"image"
 	"image/draw"
+	"time"
 
 	"github.com/go-gl/gl/all-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
@@ -65,7 +65,7 @@ func CreateWindow(title string, f func(getInput GetInput) image.Image) {
 
 		window.SwapBuffers()
 
-		time.Sleep(1000/60)
+		time.Sleep(1000 / 60)
 		glfw.PollEvents()
 	}
 }

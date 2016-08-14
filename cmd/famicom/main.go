@@ -79,7 +79,7 @@ func createCPU(rom nesfile.T) (*memory.Memory, *cpu.CPU) {
 func run(c *cpu.CPU, vblank chan bool) {
 	for {
 		select {
-		case <- vblank:
+		case <-vblank:
 			c.InterrruptNMI()
 		default:
 			c.Step()
