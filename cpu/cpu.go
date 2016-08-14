@@ -247,8 +247,9 @@ func (c *CPU) Execute(inst d.Instruction) {
 		value := c.read(inst)
 		c.load(&c.a, c.a^value)
 	case d.INC:
-		value := c.read(inst)
-		c.store(c.address(inst), value+1)
+		value := c.read(inst) + 1
+		c.nz(value)
+		c.store(c.address(inst), value)
 	case d.INX:
 		c.load(&c.x, c.x+1)
 	case d.INY:
