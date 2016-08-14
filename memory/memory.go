@@ -4,12 +4,14 @@ type Memory struct {
 	Data      [0x10000]byte
 	writeTrap map[uint16]func(byte)
 	readTrap  map[uint16]func() byte
+	mirror    map[uint16]uint16
 }
 
 func New() *Memory {
 	var memory Memory
 	memory.writeTrap = map[uint16]func(byte){}
 	memory.readTrap = map[uint16]func() byte{}
+	memory.mirror = map[uint16]uint16{}
 	return &memory
 }
 
@@ -23,7 +25,7 @@ func (memory *Memory) Read(address uint16) uint8 {
 	if ok {
 		return f()
 	} else {
-		return memory.Data[address]
+		return memory.Data[memory.resolve(address)]
 	}
 }
 
@@ -43,7 +45,7 @@ func (memory *Memory) Write(address uint16, value byte) {
 	if ok {
 		f(value)
 	} else {
-		memory.Data[address] = value
+		memory.Data[memory.resolve(address)] = value
 	}
 }
 
@@ -53,4 +55,20 @@ func (memory *Memory) WriteTrap(address uint16, f func(byte)) {
 
 func (memory *Memory) ReadTrap(address uint16, f func() byte) {
 	memory.readTrap[address] = f
+}
+
+func (self *Memory) SetMirror(from, to uint16, size uint16) {
+	for i := uint16(0); i < size; i++ {
+		self.mirror[to+i] = from + i
+	}
+}
+
+func (self *Memory) resolve(address uint16) uint16 {
+	address2, ok := self.mirror[address]
+
+	if ok {
+		return address2
+	} else {
+		return address
+	}
 }

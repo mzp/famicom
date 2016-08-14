@@ -85,3 +85,41 @@ func TestReadTrap(t *testing.T) {
 		t.Error("cannot invoke read trap")
 	}
 }
+
+func TestMirrorRead(t *testing.T) {
+	memory := New()
+	memory.SetMirror(0x3F00, 0x3F10, 2)
+
+	memory.Write(0x3F00, 0xca)
+	memory.Write(0x3F01, 0xfe)
+	memory.Write(0x3F02, 0xba)
+
+	if memory.Read(0x3F10) != 0xca {
+		t.Error("not mirror 3F10")
+	}
+	if memory.Read(0x3F11) != 0xfe {
+		t.Error("not mirror 3F11")
+	}
+	if memory.Read(0x3F12) != 0 {
+		t.Error("not mirror 3F12")
+	}
+}
+
+func TestMirrorWrite(t *testing.T) {
+	memory := New()
+	memory.SetMirror(0x3F00, 0x3F10, 2)
+
+	memory.Write(0x3F10, 0xca)
+	memory.Write(0x3F11, 0xfe)
+	memory.Write(0x3F12, 0xba)
+
+	if memory.Read(0x3F00) != 0xca {
+		t.Error()
+	}
+	if memory.Read(0x3F01) != 0xfe {
+		t.Error()
+	}
+	if memory.Read(0x3F02) != 0 {
+		t.Error()
+	}
+}
