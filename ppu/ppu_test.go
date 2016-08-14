@@ -157,6 +157,22 @@ func TestVRAWWriteY(t *testing.T) {
 	assertScreen(t, ppu, 'E', 0, 8, ppu.bgPalettes[0])
 }
 
+func TestSetAddress(t *testing.T) {
+	m := memory.New()
+	ppu := New(m)
+	ppu.SetAddress(0x20)
+	ppu.SetAddress(0x0)
+	if ppu.vramAddress != 0x2000 {
+		t.Errorf("expect 0x2000 but %x", ppu.vramAddress)
+	}
+
+	ppu.SetAddress(0xca)
+	ppu.SetAddress(0xfe)
+	if ppu.vramAddress != 0xcafe {
+		t.Errorf("expect 0xcafe but %x", ppu.vramAddress)
+	}
+}
+
 func TestPatternSelector(t *testing.T) {
 	m := memory.New()
 	m.Load(0x0, load("../example/hello/hello.nes"))

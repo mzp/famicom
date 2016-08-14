@@ -105,6 +105,7 @@ func (ppu *PPU) SetAddress(data uint8) {
 		ppu.vramHigh = false
 	} else {
 		ppu.vramAddress |= uint16(data)
+		ppu.vramHigh = true
 	}
 }
 
