@@ -24,7 +24,7 @@ func renderBackground(ppu *PPU, nameTables, attributeTables [4][]byte) *image.RG
 		nameTable := nameTables[i]
 		attributeTable := attributeTables[i]
 
-		debug.DumpNameTale(i, nameTable)
+		var debugingAttributeTable [32 * 32]byte
 
 		bx := (i % 2) * WIDTH
 		by := (i / 2) * HEIGHT
@@ -34,11 +34,14 @@ func renderBackground(ppu *PPU, nameTables, attributeTables [4][]byte) *image.RG
 			y := n / 32
 
 			paletteIndex := getAttribute(attributeTable, x, y)
+
+			debugingAttributeTable[y*32+x] = paletteIndex
 			pattern.PutImage(background,
 				bx+x*8, by+y*8,
 				ppu.patterns[ppu.backgroundIndex][v],
 				ppu.bgPalettes[paletteIndex])
 		}
+		debug.DumpBackground(i, nameTable, debugingAttributeTable[:])
 	}
 
 	return background
