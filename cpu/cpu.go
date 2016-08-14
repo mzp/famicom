@@ -236,8 +236,9 @@ func (c *CPU) Execute(inst d.Instruction) {
 	case d.CPY:
 		c.compare(c.y, inst)
 	case d.DEC:
-		value := c.read(inst)
-		c.store(c.address(inst), value-1)
+		value := c.read(inst) - 1
+		c.nz(value)
+		c.store(c.address(inst), value)
 	case d.DEX:
 		c.load(&c.x, c.x-1)
 	case d.DEY:

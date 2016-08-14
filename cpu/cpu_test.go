@@ -394,6 +394,10 @@ func TestIncDec(t *testing.T) {
 	if m.Read(0x2000) != 0x80 {
 		t.Error()
 	}
+
+	if !cpu.status.negative {
+		t.Error()
+	}
 }
 
 func TestIncDecReg(t *testing.T) {
