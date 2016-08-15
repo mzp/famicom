@@ -59,6 +59,11 @@ func (t *PPU) refresh() {
 	t.bgPalettes[2] = palette.Read(m.ReadRange(0x3F08, 4))
 	t.bgPalettes[3] = palette.Read(m.ReadRange(0x3F0C, 4))
 
+	// Use universal background color at all palette 0
+	for i := 0; i < 3; i++ {
+		t.bgPalettes[i+1][0] = t.bgPalettes[0][0]
+	}
+
 	t.spritePalettes[0] = palette.Read(m.ReadRange(0x3F10, 4))
 	t.spritePalettes[1] = palette.Read(m.ReadRange(0x3F14, 4))
 	t.spritePalettes[2] = palette.Read(m.ReadRange(0x3F18, 4))
