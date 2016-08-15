@@ -140,6 +140,22 @@ func TestVRAWWriteX(t *testing.T) {
 	assertScreen(t, ppu, 'E', 8, 0, ppu.bgPalettes[0])
 }
 
+func TestVRAMRead(t *testing.T) {
+	m := memory.New()
+	m.Write(0x2000, 'H')
+	m.Write(0x2001, 'E')
+	ppu := New(m)
+
+	ppu.SetAddress(0x20)
+	ppu.SetAddress(0x0)
+	if ppu.ReadVRAM() != 'H' {
+		t.Error()
+	}
+	if ppu.ReadVRAM() != 'E' {
+		t.Error()
+	}
+}
+
 func TestVRAWWriteY(t *testing.T) {
 	m := memory.New()
 	m.Load(0x0, load("../example/hello/hello.nes"))

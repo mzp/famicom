@@ -119,6 +119,13 @@ func (ppu *PPU) WriteVRAM(data uint8) {
 	ppu.vramAddress.Set(address + ppu.vramOffset)
 }
 
+func (ppu *PPU) ReadVRAM() uint8 {
+	address := ppu.vramAddress.Value()
+	value := ppu.memory.Read(address)
+	ppu.vramAddress.Set(address + ppu.vramOffset)
+	return value
+}
+
 func (ppu *PPU) startRender() {
 	ppu.refresh()
 	ppu.rendering = true

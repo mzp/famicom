@@ -33,6 +33,9 @@ func ConnectPPU(memory *memory.Memory, ppu *ppu.PPU) {
 	memory.WriteTrap(0x2007, func(value byte) {
 		ppu.WriteVRAM(value)
 	})
+	memory.ReadTrap(0x2007, func() byte {
+		return ppu.ReadVRAM()
+	})
 	memory.WriteTrap(0x2008, func(value byte) {
 		fmt.Println(value)
 	})
