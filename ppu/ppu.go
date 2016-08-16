@@ -5,6 +5,7 @@ import (
 	"image/color"
 
 	"github.com/mzp/famicom/bits"
+	"github.com/mzp/famicom/debug"
 	memlib "github.com/mzp/famicom/memory"
 	"github.com/mzp/famicom/palette"
 	"github.com/mzp/famicom/pattern"
@@ -213,7 +214,10 @@ func (ppu *PPU) Render() image.Image {
 		img = image.NewRGBA(image.Rect(0, 0, WIDTH, HEIGHT))
 	}
 
+	debug.DumpSprite(ppu.spriteMemory.Get())
+
 	if ppu.sprite {
+		debug.DumpPatternImage("sprite", ppu.patterns[ppu.spriteIndex])
 		for _, sp := range ppu.spriteMemory.Get() {
 			pattern.PutImage(img,
 				int(sp.X),

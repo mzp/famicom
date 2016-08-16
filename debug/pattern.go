@@ -1,6 +1,7 @@
 package debug
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"image/png"
@@ -9,7 +10,7 @@ import (
 	"github.com/mzp/famicom/pattern"
 )
 
-func DumpPatternImage(patterns []pattern.Pattern) {
+func DumpPatternImage(name string, patterns []pattern.Pattern) {
 	img := image.NewRGBA(image.Rect(0, 0, pattern.WIDTH*8, pattern.HEIGHT*len(patterns)/8))
 
 	pallets := []color.Color{
@@ -26,7 +27,7 @@ func DumpPatternImage(patterns []pattern.Pattern) {
 		pattern.PutImage(img, x, y, p, pallets)
 	}
 
-	file, _ := os.Create("log/pattern.png")
+	file, _ := os.Create(fmt.Sprintf("log/%s-pattern.png", name))
 	defer file.Close()
 	png.Encode(file, img)
 }

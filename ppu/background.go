@@ -18,7 +18,7 @@ func getAttribute(attributeTable []byte, x, y int) byte {
 
 func renderBackground(ppu *PPU, nameTables, attributeTables [4][]byte) *image.RGBA {
 	background := image.NewRGBA(image.Rect(0, 0, WIDTH*2, HEIGHT*2))
-	debug.DumpPatternImage(ppu.patterns[ppu.backgroundIndex])
+	debug.DumpPatternImage("bg", ppu.patterns[ppu.backgroundIndex])
 
 	for i := 0; i < 4; i++ {
 		nameTable := nameTables[i]
