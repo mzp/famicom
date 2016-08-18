@@ -26,6 +26,7 @@ type PPU struct {
 	sprite           bool
 	background       bool
 	vramAddress      doubleByte
+	vramBuffer       uint8
 	vramOffset       uint16
 	rendering        bool
 }
@@ -121,9 +122,17 @@ func (ppu *PPU) WriteVRAM(data uint8) {
 
 func (ppu *PPU) ReadVRAM() uint8 {
 	address := ppu.vramAddress.Value()
+	defer ppu.vramAddress.Set(address + ppu.vramOffset)
+
 	value := ppu.memory.Read(address)
-	ppu.vramAddress.Set(address + ppu.vramOffset)
-	return value
+
+	if address < 0x3F00 {
+		t := ppu.vramBuffer
+		ppu.vramBuffer = value
+		return t
+	} else {
+		return value
+	}
 }
 
 func (ppu *PPU) startRender() {

@@ -140,7 +140,23 @@ func TestVRAWWriteX(t *testing.T) {
 	assertScreen(t, ppu, 'E', 8, 0, ppu.bgPalettes[0])
 }
 
-func TestVRAMRead(t *testing.T) {
+func TestVRAMReadWithoutBuffer(t *testing.T) {
+	m := memory.New()
+	m.Write(0x3FFE, 'H')
+	m.Write(0x3FFF, 'E')
+	ppu := New(m)
+
+	ppu.SetAddress(0x3F)
+	ppu.SetAddress(0xFE)
+	if ppu.ReadVRAM() != 'H' {
+		t.Error()
+	}
+	if ppu.ReadVRAM() != 'E' {
+		t.Error()
+	}
+}
+
+func TestVRAMReadWithinBuffer(t *testing.T) {
 	m := memory.New()
 	m.Write(0x2000, 'H')
 	m.Write(0x2001, 'E')
@@ -148,6 +164,8 @@ func TestVRAMRead(t *testing.T) {
 
 	ppu.SetAddress(0x20)
 	ppu.SetAddress(0x0)
+
+	ppu.ReadVRAM()
 	if ppu.ReadVRAM() != 'H' {
 		t.Error()
 	}
