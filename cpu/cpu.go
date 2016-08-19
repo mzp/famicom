@@ -353,6 +353,9 @@ func (c *CPU) Step() {
 		c.pc = int(c.memory.Read16(0xFFFC))
 		c.status.irq = true
 	case nmi:
+		fmt.Printf("OperTask %02x\n", c.memory.Read(0x0772))
+		fmt.Println(c.memory.ReadRange(0x200, 50))
+
 		c.push(uint8(c.pc >> 8))
 		c.push(uint8(c.pc))
 		c.push(c.status.uint8())

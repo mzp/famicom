@@ -233,9 +233,9 @@ func (ppu *PPU) Render() image.Image {
 func (ppu *PPU) Status() byte {
 	ppu.scroll.Reset()
 	if ppu.rendering {
-		return 0
+		return 0x40
 	} else {
-		return 0x80
+		return 0xc0
 	}
 }
 

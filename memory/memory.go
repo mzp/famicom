@@ -1,5 +1,7 @@
 package memory
 
+// import "fmt"
+
 type Memory struct {
 	Data      [0x10000]byte
 	writeTrap map[uint16]func(byte)
@@ -47,6 +49,14 @@ func (memory *Memory) ReadRange(address uint16, size uint16) []byte {
 
 func (memory *Memory) Write(address uint16, value byte) {
 	f, ok := memory.writeTrap[address]
+
+/*	if 0x02 <= address && address <= 0x07 {
+		fmt.Printf("wrote %x %x\n", address, value)
+	}
+
+	if 0x0200 <= address && address <= 0x02FF  {
+		fmt.Printf("wrote %x %x\n", address, value)
+	}*/
 
 	if ok {
 		f(value)
