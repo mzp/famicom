@@ -30,6 +30,7 @@ type PPU struct {
 	vramBuffer       uint8
 	vramOffset       uint16
 	rendering        bool
+	hit bool
 }
 
 var black = color.RGBA{0, 0, 0, 0xFF}
@@ -139,6 +140,7 @@ func (ppu *PPU) ReadVRAM() uint8 {
 func (ppu *PPU) startRender() {
 	ppu.refresh()
 	ppu.rendering = true
+	ppu.hit = false
 }
 
 func (ppu *PPU) endRender() {
@@ -215,6 +217,7 @@ func (ppu *PPU) Render() image.Image {
 	}
 
 	debug.DumpSprite(ppu.spriteMemory.Get())
+	ppu.hit = true
 
 	if ppu.sprite {
 		debug.DumpPatternImage("sprite", ppu.patterns[ppu.spriteIndex])
@@ -232,10 +235,16 @@ func (ppu *PPU) Render() image.Image {
 
 func (ppu *PPU) Status() byte {
 	ppu.scroll.Reset()
+
+	var n byte
+	if ppu.hit {
+		n = 0x40
+	}
+
 	if ppu.rendering {
-		return 0x40
+		return 0x00 | n
 	} else {
-		return 0xc0
+		return 0x80 | n
 	}
 }
 

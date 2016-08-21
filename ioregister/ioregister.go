@@ -41,8 +41,12 @@ func ConnectPPU(memory *memory.Memory, ppu *ppu.PPU) {
 	})
 
 	memory.WriteTrap(0x4014, func(value byte) {
-		fmt.Printf("DMA: %x\n", uint16(value) <<8)
 		data := memory.ReadRange(uint16(value)<<8, 0xFF)
+
+		for _, x := range data {
+			fmt.Printf("%02x ", x)
+		}
+		fmt.Println()
 		ppu.CopySpriteDMA(data)
 	})
 }
