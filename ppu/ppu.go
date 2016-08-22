@@ -228,7 +228,8 @@ func (ppu *PPU) Render() image.Image {
 				ppu.patterns[ppu.spriteIndex][sp.Pattern],
 				ppu.spritePalettes[sp.Palette],
 				sp.FlipHorizon,
-				sp.FlipVertical)
+				sp.FlipVertical,
+				true)
 		}
 	}
 
