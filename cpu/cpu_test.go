@@ -486,6 +486,20 @@ func TestCompareFlag(t *testing.T) {
 	}
 }
 
+func TestCompareNegative(t *testing.T) {
+	cpu, _ := create()
+	cpu.a = 0xff
+	cpu.Execute(decoder.Instruction{
+		Op:             decoder.CMP,
+		AddressingMode: decoder.Absolute,
+		Value:          0x2000,
+	})
+
+	if !cpu.status.negative {
+		t.Error("clear unexpected flag")
+	}
+}
+
 func TestBitCompare(t *testing.T) {
 	inst := func(op decoder.Op) decoder.Instruction {
 		return decoder.Instruction{

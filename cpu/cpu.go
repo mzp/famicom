@@ -116,9 +116,7 @@ func (c *CPU) sbc(inst d.Instruction) {
 
 func (c *CPU) compare(reg uint8, inst d.Instruction) {
 	value := c.read(inst)
-
-	c.status.negative = reg < value
-	c.status.zero = reg == value
+	c.nz(reg - value)
 	c.status.carry = reg >= value
 }
 
