@@ -20,8 +20,6 @@ func DumpSprite(sprites []sprite.Sprite) {
 			fmt.Fprintln(file)
 		}
 		sprite := sprites[i]
-		fmt.Fprintf(file, "(%02x,%02x, %02x) ", sprite.X, sprite.Y, sprite.Pattern)
+		fmt.Fprintf(file, "(%02x,%02x) P:%x H:%t V:%t\n", sprite.X, sprite.Y, sprite.Pattern, sprite.FlipHorizon, sprite.FlipVertical)
 	}
-
-	fmt.Fprintln(file, "\n")
 }

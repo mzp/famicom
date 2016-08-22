@@ -222,11 +222,13 @@ func (ppu *PPU) Render() image.Image {
 	if ppu.sprite {
 		debug.DumpPatternImage("sprite", ppu.patterns[ppu.spriteIndex])
 		for _, sp := range ppu.spriteMemory.Get() {
-			pattern.PutImage(img,
+			pattern.PutImageWithFlip(img,
 				int(sp.X),
 				int(sp.Y),
 				ppu.patterns[ppu.spriteIndex][sp.Pattern],
-				ppu.spritePalettes[sp.Palette])
+				ppu.spritePalettes[sp.Palette],
+				sp.FlipHorizon,
+				sp.FlipVertical)
 		}
 	}
 

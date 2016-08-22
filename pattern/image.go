@@ -13,11 +13,30 @@ func set(img *image.RGBA, x, y int, c color.Color) {
 	img.Set(x%width+min.X, y%height+min.Y, c)
 }
 
-func PutImage(img *image.RGBA, x int, y int, pattern Pattern, pallets []color.Color) {
-	for py, row := range pattern {
-		for px, v := range row {
+func PutImageWithFlip(img *image.RGBA, x int, y int, pattern Pattern, pallets []color.Color, flipH, flipV bool) {
+	for py := 0; py < HEIGHT; py++ {
+		for px := 0; px < WIDTH; px++ {
+			var row [8]byte
+			var v byte
+
+			if flipV {
+				row = pattern[HEIGHT-py-1]
+			} else {
+				row = pattern[py]
+			}
+
+			if flipH {
+				v = row[WIDTH-px-1]
+			} else {
+				v = row[px]
+			}
+
 			c := pallets[v]
 			set(img, x+px, y+py, c)
 		}
 	}
+}
+
+func PutImage(img *image.RGBA, x int, y int, pattern Pattern, pallets []color.Color) {
+	PutImageWithFlip(img, x, y, pattern, pallets, false, false)
 }
