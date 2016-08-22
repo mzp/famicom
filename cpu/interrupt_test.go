@@ -3,42 +3,38 @@ package cpu
 import "testing"
 
 func TestReset(t *testing.T) {
-	cpu, memory := create()
+	core, memory := createCore()
 	memory.Write(0xFFFC, 0xfe)
 	memory.Write(0xFFFD, 0xca)
-	cpu.InterrruptReset()
+	handleReset(core)
 
-	cpu.Step()
-
-	if cpu.pc != 0xcafe {
+	if core.pc != 0xcafe {
 		t.Error("cannot jump Reset handler")
 	}
 
-	if !cpu.status.irq {
+	if !core.status.irq {
 		t.Error("cannot disable irq status")
 	}
 }
 
 func TestNMI(t *testing.T) {
-	cpu, memory := create()
+	core, memory := createCore()
 	memory.Write(0xFFFA, 0xfe)
 	memory.Write(0xFFFB, 0xca)
-	cpu.status.negative = true
-	cpu.status.brk = true
+	core.status.negative = true
+	core.status.brk = true
 
-	cpu.InterrruptNMI()
+	handleNMI(core)
 
-	cpu.Step()
-
-	if cpu.pc != 0xcafe {
+	if core.pc != 0xcafe {
 		t.Error("cannot jump Reset handler")
 	}
 
-	if !cpu.status.irq {
+	if !core.status.irq {
 		t.Error("cannot disable irq status")
 	}
 
-	if cpu.status.brk {
+	if core.status.brk {
 		t.Error("cannot reset break status")
 	}
 
@@ -50,31 +46,29 @@ func TestNMI(t *testing.T) {
 		t.Errorf("cannot status: %x", memory.Read(0x01FD))
 	}
 
-	if cpu.s != 0xFC {
-		t.Errorf("cannot push down stack: %x", cpu.s)
+	if core.s != 0xFC {
+		t.Errorf("cannot push down stack: %x", core.s)
 	}
 }
 
 func TestIrq(t *testing.T) {
-	cpu, memory := create()
+	core, memory := createCore()
 	memory.Write(0xFFFE, 0xfe)
 	memory.Write(0xFFFF, 0xca)
-	cpu.status.negative = true
-	cpu.status.brk = true
+	core.status.negative = true
+	core.status.brk = true
 
-	cpu.InterrruptIrq()
+	handleInteruption(core, false)
 
-	cpu.Step()
-
-	if cpu.pc != 0xcafe {
+	if core.pc != 0xcafe {
 		t.Error("cannot jump Reset handler")
 	}
 
-	if !cpu.status.irq {
+	if !core.status.irq {
 		t.Error("cannot disable irq status")
 	}
 
-	if cpu.status.brk {
+	if core.status.brk {
 		t.Error("cannot reset break status")
 	}
 
@@ -86,31 +80,29 @@ func TestIrq(t *testing.T) {
 		t.Errorf("cannot status: %x", memory.Read(0x01FD))
 	}
 
-	if cpu.s != 0xFC {
-		t.Errorf("cannot push down stack: %x", cpu.s)
+	if core.s != 0xFC {
+		t.Errorf("cannot push down stack: %x", core.s)
 	}
 }
 
 func TestBreak(t *testing.T) {
-	cpu, memory := create()
+	core, memory := createCore()
 	memory.Write(0xFFFE, 0xfe)
 	memory.Write(0xFFFF, 0xca)
-	cpu.status.negative = true
-	cpu.status.brk = true
+	core.status.negative = true
+	core.status.brk = true
 
-	cpu.InterrruptBreak()
+	handleInteruption(core, true)
 
-	cpu.Step()
-
-	if cpu.pc != 0xcafe {
+	if core.pc != 0xcafe {
 		t.Error("cannot jump Reset handler")
 	}
 
-	if !cpu.status.irq {
+	if !core.status.irq {
 		t.Error("cannot disable irq status")
 	}
 
-	if !cpu.status.brk {
+	if !core.status.brk {
 		t.Error("cannot set break status")
 	}
 
@@ -122,37 +114,7 @@ func TestBreak(t *testing.T) {
 		t.Errorf("cannot status: %x", memory.Read(0x01FD))
 	}
 
-	if cpu.s != 0xFC {
-		t.Errorf("cannot push down stack: %x", cpu.s)
-	}
-}
-
-func TestIrqDisable(t *testing.T) {
-	cpu, memory := create()
-	memory.Write(0xFFFE, 0xfe)
-	memory.Write(0xFFFF, 0xca)
-	cpu.status.irq = true
-
-	cpu.InterrruptIrq()
-
-	cpu.Step()
-
-	if cpu.pc == 0xcafe {
-		t.Error("cannot disable irq")
-	}
-}
-
-func TestBreakDisable(t *testing.T) {
-	cpu, memory := create()
-	memory.Write(0xFFFE, 0xfe)
-	memory.Write(0xFFFF, 0xca)
-	cpu.status.irq = true
-
-	cpu.InterrruptBreak()
-
-	cpu.Step()
-
-	if cpu.pc == 0xcafe {
-		t.Error("cannot disable irq")
+	if core.s != 0xFC {
+		t.Errorf("cannot push down stack: %x", core.s)
 	}
 }
