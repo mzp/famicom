@@ -21,11 +21,7 @@ type bg struct {
 }
 
 func (self *bg) setPalettes(palettes [][]color.Color) {
-	self.palettes[0] = palettes[0]
-	self.palettes[1] = palettes[1]
-	self.palettes[2] = palettes[2]
-	self.palettes[3] = palettes[3]
-
+	copy(self.palettes[:], palettes)
 	self.backdropColor = self.palettes[0][0]
 }
 
