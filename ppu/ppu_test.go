@@ -55,7 +55,7 @@ func TestLoadBgPalette(t *testing.T) {
 		color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, // 0x20
 	}
 
-	for n, c := range ppu.bgPalettes[0] {
+	for n, c := range ppu.bg.palettes[0] {
 		if c != expect[n] {
 			t.Errorf("unmatch palette: %v %v", c, expect[n])
 		}
@@ -88,8 +88,8 @@ func TestPattern(t *testing.T) {
 	ppu := New(m)
 	ppu.SetControl2(0x8)
 
-	assertScreen(t, ppu, 'H', 0, 0, ppu.bgPalettes[0])
-	assertScreen(t, ppu, ' ', 8, 0, ppu.bgPalettes[0])
+	assertScreen(t, ppu, 'H', 0, 0, ppu.bg.palettes[0])
+	assertScreen(t, ppu, ' ', 8, 0, ppu.bg.palettes[0])
 }
 
 func TestScreenAddress(t *testing.T) {
@@ -99,10 +99,10 @@ func TestScreenAddress(t *testing.T) {
 	ppu := New(m)
 	ppu.SetControl1(1)
 	ppu.SetControl2(0x8)
-	ppu.VerticalMirror = true
+	ppu.SetVerticalMirror(true)
 
-	assertScreen(t, ppu, 'H', 0, 0, ppu.bgPalettes[0])
-	assertScreen(t, ppu, ' ', 8, 0, ppu.bgPalettes[0])
+	assertScreen(t, ppu, 'H', 0, 0, ppu.bg.palettes[0])
+	assertScreen(t, ppu, ' ', 8, 0, ppu.bg.palettes[0])
 }
 
 func TestBGShow(t *testing.T) {
@@ -136,8 +136,8 @@ func TestVRAWWriteX(t *testing.T) {
 	ppu.WriteVRAM('H')
 	ppu.WriteVRAM('E')
 
-	assertScreen(t, ppu, 'H', 0, 0, ppu.bgPalettes[0])
-	assertScreen(t, ppu, 'E', 8, 0, ppu.bgPalettes[0])
+	assertScreen(t, ppu, 'H', 0, 0, ppu.bg.palettes[0])
+	assertScreen(t, ppu, 'E', 8, 0, ppu.bg.palettes[0])
 }
 
 func TestVRAMReadWithoutBuffer(t *testing.T) {
@@ -187,24 +187,8 @@ func TestVRAWWriteY(t *testing.T) {
 	ppu.WriteVRAM('H')
 	ppu.WriteVRAM('E')
 
-	assertScreen(t, ppu, 'H', 0, 0, ppu.bgPalettes[0])
-	assertScreen(t, ppu, 'E', 0, 8, ppu.bgPalettes[0])
-}
-
-func TestSetAddress(t *testing.T) {
-	m := memory.New()
-	ppu := New(m)
-	ppu.SetAddress(0x20)
-	ppu.SetAddress(0x0)
-	if ppu.vramAddress.Value() != 0x2000 {
-		t.Errorf("expect 0x2000 but %x", ppu.vramAddress)
-	}
-
-	ppu.SetAddress(0xca)
-	ppu.SetAddress(0xfe)
-	if ppu.vramAddress.Value() != 0xcafe {
-		t.Errorf("expect 0xcafe but %x", ppu.vramAddress)
-	}
+	assertScreen(t, ppu, 'H', 0, 0, ppu.bg.palettes[0])
+	assertScreen(t, ppu, 'E', 0, 8, ppu.bg.palettes[0])
 }
 
 func TestPatternSelector(t *testing.T) {
@@ -215,7 +199,7 @@ func TestPatternSelector(t *testing.T) {
 	ppu.SetControl1(0x10)
 	ppu.SetControl2(0x8)
 
-	assertScreen(t, ppu, ' ', 0, 0, ppu.bgPalettes[0])
+	assertScreen(t, ppu, ' ', 0, 0, ppu.bg.palettes[0])
 }
 
 func TestLoadSpritePalette(t *testing.T) {
@@ -230,11 +214,11 @@ func TestLoadSpritePalette(t *testing.T) {
 		color.RGBA{0xFF, 0x6D, 0xFF, 0xFF}, // 0x25
 	}
 
-	if len(ppu.spritePalettes[0]) != 4 {
+	if len(ppu.sprite.palettes[0]) != 4 {
 		t.Error()
 	}
 
-	for n, c := range ppu.spritePalettes[0] {
+	for n, c := range ppu.sprite.palettes[0] {
 		if c != expect[n] {
 			t.Errorf("unmatch palette: %v %v", c, expect[n])
 		}
@@ -253,7 +237,8 @@ func TestSprite(t *testing.T) {
 	ppu.WriteSprite(0)
 	ppu.WriteSprite(20)
 
-	assertScreen(t, ppu, 'H', 20, 10, ppu.spritePalettes[0])
+	ppu.sprite.palettes[0][0] = color.RGBA{}
+	assertScreen(t, ppu, 'H', 20, 10, ppu.sprite.palettes[0])
 }
 
 func TestPPUStatus(t *testing.T) {
@@ -279,8 +264,8 @@ func TestMirror(t *testing.T) {
 	ppu := New(m)
 	ppu.SetControl2(0x8)
 
-	assertScreen(t, ppu, 'H', 0, 0, ppu.bgPalettes[0])
-	assertScreen(t, ppu, ' ', 8, 0, ppu.bgPalettes[0])
+	assertScreen(t, ppu, 'H', 0, 0, ppu.bg.palettes[0])
+	assertScreen(t, ppu, ' ', 8, 0, ppu.bg.palettes[0])
 }
 
 func TestScroll(t *testing.T) {
@@ -292,5 +277,5 @@ func TestScroll(t *testing.T) {
 
 	ppu.SetScroll(1)
 	ppu.SetScroll(0)
-	assertScreen(t, ppu, 'H', 7, 0, ppu.bgPalettes[0])
+	assertScreen(t, ppu, 'H', 7, 0, ppu.bg.palettes[0])
 }
