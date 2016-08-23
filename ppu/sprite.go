@@ -54,14 +54,18 @@ func (self *sprite) render(img *image.RGBA, patterns [2][]pattern.Pattern) {
 
 	if self.enable {
 		for _, sp := range self.memory.Get() {
-			pattern.PutImageWithFlip(img,
-				int(sp.X),
-				int(sp.Y),
-				patterns[self.index][sp.Pattern],
+			patterns[self.index][sp.Pattern].Put(
+				img,
+				image.Point{
+					int(sp.X),
+					int(sp.Y),
+				},
 				self.palettes[sp.Palette],
-				sp.FlipHorizon,
-				sp.FlipVertical,
-				true)
+				pattern.Option{
+					FlipH:         sp.FlipHorizon,
+					FlipV:         sp.FlipVertical,
+					BackdropColor: nil,
+				})
 		}
 	}
 }

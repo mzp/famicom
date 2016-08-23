@@ -68,7 +68,9 @@ func at(img image.Image, x, y int) color.Color {
 
 func assertScreen(t *testing.T, ppu *PPU, c byte, dx, dy int, palette []color.Color) {
 	expect := image.NewRGBA(image.Rect(0, 0, 8, 8))
-	pattern.PutImage(expect, 0, 0, ppu.patterns[0][c], palette)
+	ppu.patterns[0][c].Put(expect, image.Point{}, palette, pattern.Option{
+		BackdropColor: palette[0],
+	})
 
 	screen := ppu.Render()
 

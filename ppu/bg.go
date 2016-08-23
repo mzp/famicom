@@ -10,6 +10,8 @@ import (
 )
 
 type bg struct {
+	backdropColor color.Color
+
 	enable         bool
 	verticalMirror bool
 	palettes       [4][]color.Color
@@ -19,16 +21,12 @@ type bg struct {
 }
 
 func (self *bg) setPalettes(palettes [][]color.Color) {
-	// FIXME: palette parser
 	self.palettes[0] = palettes[0]
 	self.palettes[1] = palettes[1]
 	self.palettes[2] = palettes[2]
 	self.palettes[3] = palettes[3]
 
-	// Use universal background color at all palette 0
-	for i := 0; i < 3; i++ {
-		self.palettes[i+1][0] = self.palettes[0][0]
-	}
+	self.backdropColor = self.palettes[0][0]
 }
 
 func (self *bg) setNameTableIndex(n int) {
@@ -97,10 +95,16 @@ func (self *bg) renderAll(vram *memory.Memory, patterns [2][]pattern.Pattern) *i
 			paletteIndex := getAttribute(attributeTable, x, y)
 
 			debugingAttributeTable[y*32+x] = paletteIndex
-			pattern.PutImage(background,
-				bx+x*8, by+y*8,
-				patterns[self.index][v],
-				self.palettes[paletteIndex])
+			patterns[self.index][v].Put(
+				background,
+				image.Point{
+					bx + x*8,
+					by + y*8,
+				},
+				self.palettes[paletteIndex],
+				pattern.Option{
+					BackdropColor: self.backdropColor,
+				})
 		}
 		debug.DumpBackground(i, nameTable, debugingAttributeTable[:])
 	}

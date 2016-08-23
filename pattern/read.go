@@ -2,18 +2,6 @@ package pattern
 
 import "io"
 
-const (
-	// size for pixel
-	WIDTH  = 8
-	HEIGHT = 8
-
-	// size for byte
-	UNIT_BYTES = 8
-	READ_BYTES = UNIT_BYTES * 2
-)
-
-type Pattern [WIDTH][HEIGHT]byte
-
 func bits(x byte) []byte {
 	xs := make([]byte, 8)
 

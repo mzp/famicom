@@ -15,7 +15,7 @@ type PPU struct {
 
 	sprite *sprite
 	bg     bg
-	vram         *vram
+	vram   *vram
 
 	rendering    bool
 	interruptNMI bool

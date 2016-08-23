@@ -41,7 +41,7 @@ func createImage(name string, patterns []pattern.Pattern) {
 		x := (i % 8) * pattern.WIDTH
 		y := (i / 8) * pattern.HEIGHT
 
-		pattern.PutImage(img, x, y, p, pallets)
+		p.Put(img, image.Point{x, y}, pallets, pattern.Option{})
 	}
 
 	file, err := os.Create(name + ".png")
